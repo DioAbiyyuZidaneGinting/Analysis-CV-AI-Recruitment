@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="format-detection" content="telephone=no,address=no,email=no,date=no,url=no">
+  <title>{{ email_subject }}</title>
+  <!--[if mso]>
+  <noscript>
+    <xml><o:OfficeDocumentSettings><o:AllowPNG/><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml>
+  </noscript>
+  <![endif]-->
+  <style>
+    #outlook a { padding: 0; }
+    body { margin: 0; padding: 0; -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+    table, td { border-collapse: collapse; mso-table-lspace: 0pt; mso-table-rspace: 0pt; }
+    img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
+    @media only screen and (max-width: 650px) {
+      .email-container { width: 100% !important; }
+      .details-td { display: block !important; width: 100% !important; padding: 8px 0 !important; }
+      .feature-td { display: block !important; width: 100% !important; padding: 12px 0 !important; text-align: center !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;padding:0;background-color:#fafafa;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+
+<!-- PREVIEW TEXT (hidden) -->
+<div style="display:none;font-size:1px;color:#fafafa;line-height:1px;max-height:0px;max-width:0px;opacity:0;overflow:hidden;">
+  {{ preview_text }} &nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#fafafa;">
+  <tr>
+    <td align="center" style="padding:24px 12px;">
+
+      <!-- OUTER WRAPPER -->
+      <table class="email-container" role="presentation" width="650" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 8px 30px rgba(0,0,0,0.06);border:1px solid #f3f4f6;">
+
+        <!-- ═══════════════════════════════════════════
+             TOP NAV BAR (White Background with bottom border)
+        ═══════════════════════════════════════════ -->
+        <tr>
+          <td style="background-color:#ffffff;padding:18px 32px;border-bottom:1px solid #e5e7eb;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="vertical-align:middle;">
+                  <!-- Logo referenced via CID -->
+                  <img src="https://ygbvsrgfvzajpjsnrxxs.supabase.co/storage/v1/object/public/public-assets/logo.png"
+                       alt="TalentLens AI"
+                       width="130"
+                       style="height:auto;display:block;max-height:32px;width:auto;max-width:130px;">
+                </td>
+                <td align="right" style="vertical-align:middle;">
+                  <a href="{{ login_url }}" style="color:#DC2626;font-size:11px;font-weight:600;text-decoration:none;letter-spacing:0.3px;">View in browser →</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════════════════════
+             HERO SECTION (Centered Layout)
+        ═══════════════════════════════════════════ -->
+        <tr>
+          <td style="background:linear-gradient(135deg, {{ hero_gradient_start }} 0%, {{ hero_gradient_end }} 100%);padding:48px 32px;text-align:center;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;margin:0 auto;">
+              <tr>
+                <td align="center" style="text-align:center;">
+                  <!-- Status badge -->
+                  <div style="display:inline-block;background-color:{{ badge_bg }};color:{{ badge_color }};font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;padding:5px 14px;border-radius:100px;margin-bottom:18px;">
+                    {{ status_label }}
+                  </div>
+                  <!-- Headline -->
+                  <h1 style="margin:0 0 6px 0;font-size:28px;font-weight:900;color:{{ hero_text_color }};line-height:1.2;letter-spacing:-0.5px;text-align:center;">
+                    {{ hero_headline }}
+                  </h1>
+                  <!-- Candidate Name -->
+                  <h1 style="margin:0 0 18px 0;font-size:28px;font-weight:900;color:{{ accent_color }};line-height:1.2;letter-spacing:-0.5px;text-align:center;">
+                    {{ candidate_name }}
+                  </h1>
+                  <!-- Description -->
+                  <p style="margin:0 auto 28px auto;font-size:15px;line-height:1.6;color:{{ hero_subtext_color }};max-width:480px;text-align:center;">
+                    {{ hero_subtext }}
+                  </p>
+                  <!-- CTA Button -->
+                  <a href="{{ login_url }}"
+                     style="display:inline-block;background-color:{{ cta_bg }};color:{{ cta_text_color }};font-size:14px;font-weight:800;text-decoration:none;padding:14px 28px;border-radius:12px;letter-spacing:0.3px;box-shadow:0 4px 16px {{ cta_shadow }};">
+                    {{ cta_label }} &rarr;
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════════════════════
+             APPLICATION PROGRESS TIMELINE
+        ═══════════════════════════════════════════ -->
+        <tr>
+          <td style="padding:32px 32px 12px 32px;background-color:#ffffff;">
+            <p style="margin:0 0 20px 0;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#9ca3af;text-align:center;">Recruitment Progress</p>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="table-layout:fixed;width:100%;margin:0 auto;max-width:580px;border-collapse:collapse;">
+              <tr>
+                {% for step in pipeline_steps %}
+                <!-- Stage Node: {{ step.label }} -->
+                <td style="width:20%;text-align:center;vertical-align:top;padding:0;">
+                  
+                  <!-- Nested layout to align connection lines and nodes mathematically -->
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0;padding:0;width:100%;height:36px;">
+                    <tr style="height:36px;">
+                      <!-- Left Connector Line -->
+                      <td style="vertical-align:middle;padding:0;margin:0;height:36px;">
+                        {% if not loop.first %}
+                        <div style="height:3px;background-color:{{ '#DC2626' if (step.past or step.current) else '#e5e7eb' }};font-size:1px;line-height:1px;margin:0;padding:0;width:100%;display:block;">&nbsp;</div>
+                        {% else %}
+                        <div style="height:3px;background-color:transparent;font-size:1px;line-height:1px;margin:0;padding:0;width:100%;display:block;">&nbsp;</div>
+                        {% endif %}
+                      </td>
+                      
+                      <!-- Node Circle -->
+                      <td width="36" style="width:36px;text-align:center;vertical-align:middle;padding:0;margin:0;height:36px;">
+                        {% if step.past %}
+                        <!-- Completed Stage Node -->
+                        <div style="width:24px;height:24px;border-radius:12px;background-color:#DC2626;border:2px solid #DC2626;color:#ffffff;font-size:12px;font-weight:bold;line-height:24px;text-align:center;margin:0 auto;display:block;">
+                          ✓
+                        </div>
+                        {% elif step.current %}
+                        <!-- Current Active Stage Node (Larger, bold, emphasized) -->
+                        <div style="width:30px;height:30px;border-radius:15px;background-color:#ffffff;border:3px solid #DC2626;color:#DC2626;font-size:13px;font-weight:bold;line-height:30px;text-align:center;margin:0 auto;display:block;box-shadow:0 0 10px rgba(220,38,38,0.25);">
+                          {{ loop.index }}
+                        </div>
+                        {% else %}
+                        <!-- Future Outlined Stage Node -->
+                        <div style="width:24px;height:24px;border-radius:12px;background-color:#ffffff;border:2px solid #d1d5db;color:#9ca3af;font-size:12px;font-weight:bold;line-height:24px;text-align:center;margin:0 auto;display:block;">
+                          {{ loop.index }}
+                        </div>
+                        {% endif %}
+                      </td>
+                      
+                      <!-- Right Connector Line -->
+                      <td style="vertical-align:middle;padding:0;margin:0;height:36px;">
+                        {% if not loop.last %}
+                        <div style="height:3px;background-color:{{ '#DC2626' if step.past else '#e5e7eb' }};font-size:1px;line-height:1px;margin:0;padding:0;width:100%;display:block;">&nbsp;</div>
+                        {% else %}
+                        <div style="height:3px;background-color:transparent;font-size:1px;line-height:1px;margin:0;padding:0;width:100%;display:block;">&nbsp;</div>
+                        {% endif %}
+                      </td>
+                    </tr>
+                  </table>
+                  
+                  <!-- Label (Perfectly Centered) -->
+                  <div style="margin-top:10px;padding:0 4px;text-align:center;">
+                    <p style="margin:0;font-size:11px;font-weight:{{ '800' if step.current else '600' }};color:{{ '#111827' if (step.past or step.current) else '#9ca3af' }};line-height:1.3;text-align:center;white-space:nowrap;">
+                      {{ step.label }}
+                    </p>
+                  </div>
+                  
+                </td>
+                {% endfor %}
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════════════════════
+             POSITION DETAILS CARD
+        ═══════════════════════════════════════════ -->
+        <tr>
+          <td style="padding:24px 32px;background-color:#ffffff;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#ffffff;border-radius:16px;border:1px solid #fee2e2;box-shadow:0 4px 12px rgba(220,38,38,0.03);">
+              <tr>
+                <td style="padding:24px;">
+                  <p style="margin:0 0 16px 0;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#DC2626;">Position Details</p>
+                  <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+                    <tr>
+                      <td class="details-td" style="padding:0 16px 12px 0;vertical-align:top;width:50%;">
+                        <p style="margin:0;font-size:11px;color:#9ca3af;font-weight:600;margin-bottom:3px;">💼 POSITION</p>
+                        <p style="margin:0;font-size:14px;font-weight:800;color:#111827;">{{ job_title }}</p>
+                      </td>
+                      <td class="details-td" style="padding:0 0 12px 0;vertical-align:top;width:50%;">
+                        <p style="margin:0;font-size:11px;color:#9ca3af;font-weight:600;margin-bottom:3px;">🏢 DEPARTMENT</p>
+                        <p style="margin:0;font-size:14px;font-weight:800;color:#111827;">{{ department }}</p>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="details-td" style="padding:12px 16px 0 0;vertical-align:top;border-top:1px solid #fee2e2;">
+                        <p style="margin:0;font-size:11px;color:#9ca3af;font-weight:600;margin-bottom:3px;">🏛️ COMPANY</p>
+                        <p style="margin:0;font-size:14px;font-weight:800;color:#111827;">{{ company_name }}</p>
+                      </td>
+                      <td class="details-td" style="padding:12px 0 0 0;vertical-align:top;border-top:1px solid #fee2e2;">
+                        <p style="margin:0;font-size:11px;color:#9ca3af;font-weight:600;margin-bottom:3px;">📍 LOCATION</p>
+                        <p style="margin:0;font-size:14px;font-weight:800;color:#111827;">{{ location }}</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════════════════════
+             PERSONALIZED MESSAGE CARD
+        ═══════════════════════════════════════════ -->
+        <tr>
+          <td style="padding:0 32px 24px 32px;background-color:#ffffff;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:linear-gradient(135deg, {{ msg_card_gradient_start }} 0%, {{ msg_card_gradient_end }} 100%);border-radius:16px;">
+              <tr>
+                <td style="padding:28px;">
+                  <p style="margin:0 0 10px 0;font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:{{ msg_label_color }};">{{ msg_card_label }}</p>
+                  <p style="margin:0;font-size:15px;line-height:1.7;color:{{ msg_text_color }};font-weight:500;">{{ message }}</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════════════════════
+             FEATURE ROW (4 columns)
+        ═══════════════════════════════════════════ -->
+        <tr>
+          <td style="padding:0 32px 24px 32px;background-color:#ffffff;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                {% for feat in features %}
+                <td class="feature-td" style="text-align:center;vertical-align:top;padding:0 8px;width:25%;">
+                  <div style="font-size:28px;margin-bottom:8px;">{{ feat.emoji }}</div>
+                  <p style="margin:0 0 4px 0;font-size:12px;font-weight:800;color:#111827;">{{ feat.title }}</p>
+                  <p style="margin:0;font-size:11px;color:#6b7280;line-height:1.5;">{{ feat.desc }}</p>
+                </td>
+                {% endfor %}
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        {% if feedback_url %}
+        <!-- ═══════════════════════════════════════════
+             FEEDBACK CTA (only for accepted / rejected)
+        ═══════════════════════════════════════════ -->
+        <tr>
+          <td style="padding:0 32px 28px 32px;background-color:#ffffff;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0"
+                   style="background:linear-gradient(135deg,#fdf4ff 0%,#f0e6ff 100%);border-radius:16px;border:1px solid #e9d5ff;">
+              <tr>
+                <td style="padding:28px;text-align:center;">
+                  <div style="font-size:32px;margin-bottom:10px;">⭐</div>
+                  <p style="margin:0 0 6px 0;font-size:17px;font-weight:900;color:#111827;">Share Your Experience</p>
+                  <p style="margin:0 auto 20px auto;font-size:13px;color:#6b7280;line-height:1.6;max-width:400px;">
+                    Your feedback helps us improve TalentLens AI for future candidates.
+                    It only takes 2 minutes — and your voice matters!
+                  </p>
+                  <a href="{{ feedback_url }}"
+                     style="display:inline-block;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#ffffff;font-size:14px;font-weight:800;text-decoration:none;padding:13px 28px;border-radius:12px;letter-spacing:0.3px;box-shadow:0 4px 16px rgba(124,58,237,0.25);">
+                    Leave Feedback &rarr;
+                  </a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+        {% endif %}
+
+        <!-- ═══════════════════════════════════════════
+             SUPPORT SECTION
+        ═══════════════════════════════════════════ -->
+        <tr>
+          <td style="padding:24px 32px;background-color:#f9fafb;border-top:1px solid #f3f4f6;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <td style="vertical-align:top;width:55%;padding-right:24px;">
+                  <p style="margin:0 0 6px 0;font-size:14px;font-weight:800;color:#111827;">Questions?</p>
+                  <p style="margin:0;font-size:12px;color:#6b7280;line-height:1.6;">If you have any questions, feel free to reply to this email or reach out to our support team. We're here to help!</p>
+                </td>
+                <td style="vertical-align:top;width:45%;text-align:right;">
+                  <p style="margin:0 0 4px 0;font-size:13px;font-weight:800;color:#111827;">TalentLens AI Team</p>
+                  <a href="mailto:talentlensai.system@gmail.com" style="display:block;font-size:11px;color:#DC2626;text-decoration:none;font-weight:600;margin-bottom:6px;">talentlensai.system@gmail.com</a>
+                  <p style="margin:0;font-size:11px;color:#9ca3af;">&copy; 2026 TalentLens AI. All rights reserved.</p>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+        <!-- ═══════════════════════════════════════════
+             FOOTER BAR (Black)
+        ═══════════════════════════════════════════ -->
+        <tr>
+          <td style="background-color:#0a0a0a;padding:20px 32px;border-radius:0 0 20px 20px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+              <tr>
+                <!-- Logo -->
+                <td style="vertical-align:middle;width:33%;">
+                  <img src="https://ygbvsrgfvzajpjsnrxxs.supabase.co/storage/v1/object/public/public-assets/logo.png"
+                       alt="TalentLens AI"
+                       width="100"
+                       style="height:auto;display:block;max-height:24px;width:auto;max-width:100px;opacity:0.8;">
+                </td>
+                <!-- Follow us -->
+                <td style="text-align:center;vertical-align:middle;width:33%;">
+                  <p style="margin:0;font-size:10px;color:#6b7280;font-weight:600;text-transform:uppercase;letter-spacing:1px;">Follow us</p>
+                </td>
+                <!-- Social icons -->
+                <td style="text-align:right;vertical-align:middle;width:33%;">
+                  <a href="https://linkedin.com" style="display:inline-block;margin-left:10px;color:#fca5a5;text-decoration:none;font-size:16px;" title="LinkedIn">in</a>
+                  <a href="https://twitter.com" style="display:inline-block;margin-left:10px;color:#fca5a5;text-decoration:none;font-size:16px;" title="X/Twitter">𝕏</a>
+                  <a href="{{ login_url }}" style="display:inline-block;margin-left:10px;color:#fca5a5;text-decoration:none;font-size:16px;" title="Website">⌂</a>
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+
+      </table>
+      <!-- /OUTER WRAPPER -->
+
+      <!-- Unsubscribe note -->
+      <p style="margin:16px 0 0 0;text-align:center;font-size:10px;color:#9ca3af;">
+        This is an automated notification from TalentLens AI. Please do not reply directly to this email.
+      </p>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
