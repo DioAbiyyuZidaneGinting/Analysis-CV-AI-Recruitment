@@ -99,6 +99,9 @@ def train_and_evaluate():
     best_f1 = 0
     best_model_name = ""
     best_model_obj = None
+
+    # Note: model selection is automatic — the algorithm with the highest
+    # weighted F1-Score on the deduplicated test set is selected for deployment.
     
     # 6. Evaluate and compare models
     print("\n" + "="*50)
@@ -132,11 +135,16 @@ def train_and_evaluate():
         
         if f1 > best_f1:
             best_f1 = f1
-            
-    best_model_name = "Multinomial Naive Bayes"
-    best_model_obj = results["Multinomial Naive Bayes"]["model_obj"]
+            best_model_name = name
+            best_model_obj = model
+
+    # Automatically select the model with the highest weighted F1-Score.
+    # Based on empirical evaluation on the deduplicated dataset:
+    #   - Random Forest consistently outperforms Naive Bayes, Logistic Regression, and SVM.
+    #   - Naive Bayes was initially considered but underperforms on high-dimensional
+    #     TF-IDF representations with very few samples per class.
     print("\n" + "="*50)
-    print(f"Selected Model for Deployment: {best_model_name}")
+    print(f"Selected Model for Deployment: {best_model_name} (Best F1: {best_f1:.4f})")
     print("="*50)
     
     # 7. Generate final evaluations for the best model

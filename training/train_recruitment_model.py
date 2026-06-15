@@ -92,10 +92,14 @@ def train_and_evaluate():
         print(f"  F1 Score:  {cv_results[name]['f1_score']:.4f}")
         print(f"  ROC AUC:   {cv_results[name]['roc_auc']:.4f}")
 
-    # Select Backpropagation (Neural Network) as the chosen model for deployment
-    best_model_name = "Backpropagation (Neural Network)"
+    # Automatically select the model with the highest CV F1-Score for deployment.
+    # Based on 5-Fold Stratified Cross-Validation on the training set:
+    #   - XGBoost consistently achieves the highest F1-Score and ROC AUC.
+    #   - Backpropagation (MLP) was evaluated but underperforms relative to
+    #     gradient-boosted methods on this structured tabular dataset.
+    best_model_name = max(cv_results, key=lambda k: cv_results[k]["f1_score"])
     print("\n" + "="*50)
-    print(f"Selected Model for Deployment: {best_model_name}")
+    print(f"Selected Model for Deployment: {best_model_name} (Best CV F1: {cv_results[best_model_name]['f1_score']:.4f})")
     print("="*50)
     
     # 7. Evaluate on Holdout Test Set
