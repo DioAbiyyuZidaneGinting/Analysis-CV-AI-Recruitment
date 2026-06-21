@@ -8,13 +8,11 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 load_dotenv()
 
-# ─── SMTP Configuration ────────────────────────────────────────────────────────
-MAIL_SERVER   = os.environ.get("MAIL_SERVER",   "smtp.gmail.com")
-MAIL_PORT     = int(os.environ.get("MAIL_PORT", 587))
-MAIL_USERNAME = os.environ.get("MAIL_USERNAME", "talentlensai.system@gmail.com")
-MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD", "")
-MAIL_USE_TLS  = os.environ.get("MAIL_USE_TLS",  "True").lower() in ("true", "1", "yes")
-APP_URL       = os.environ.get("APP_URL", "http://localhost:5173")
+# ─── Brevo API Configuration ──────────────────────────────────────────────────
+BREVO_API_KEY      = os.environ.get("BREVO_API_KEY", "")
+BREVO_SENDER_EMAIL = os.environ.get("BREVO_SENDER_EMAIL", "talentlensai.system@gmail.com")
+BREVO_SENDER_NAME  = os.environ.get("BREVO_SENDER_NAME", "TalentLensAI")
+APP_URL            = os.environ.get("APP_URL", "http://localhost:5173")
 
 # ─── Jinja2 template environment ───────────────────────────────────────────────
 _TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), "email_templates")
@@ -413,30 +411,46 @@ def send_status_change_email(
         )
     plain_body += "\nBest regards,\nTalentLens AI Recruiting Team"
 
-    # 6. Build MIME message (Standard alternative structure with public hosted logo)
-    msg = MIMEMultipart("alternative")
-    msg["Subject"] = subject
-    msg["From"]    = f"TalentLens AI <{MAIL_USERNAME}>"
-    msg["To"]      = recipient_email
-    msg.attach(MIMEText(plain_body, "plain"))
-    msg.attach(MIMEText(html_body,  "html"))
-
-    # 7. Send via SMTP
+    # 6. Send via Brevo API
     try:
-        if not MAIL_USERNAME or not MAIL_PASSWORD:
-            raise ValueError("MAIL_USERNAME or MAIL_PASSWORD not set.")
+        import requests
 
-        if MAIL_PORT == 465:
-            server = smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, timeout=10)
-        else:
-            server = smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=10)
-            server.ehlo()
-            if MAIL_USE_TLS:
-                server.starttls()
-                server.ehlo()
-        server.login(MAIL_USERNAME, MAIL_PASSWORD)
-        server.sendmail(MAIL_USERNAME, recipient_email, msg.as_string())
-        server.quit()
+        if not BREVO_API_KEY:
+            raise ValueError("BREVO_API_KEY not set.")
+
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "accept": "application/json",
+            "api-key": BREVO_API_KEY,
+            "content-type": "application/json"
+        }
+        
+        payload = {
+            "sender": {
+                "name": BREVO_SENDER_NAME,
+                "email": BREVO_SENDER_EMAIL
+            },
+            "to": [
+                {
+                    "email": recipient_email,
+                    "name": candidate_name
+                }
+            ],
+            "subject": subject,
+            "htmlContent": html_body,
+            "textContent": plain_body
+        }
+
+        response = requests.post(url, json=payload, headers=headers, timeout=15)
+        
+        # Check response status
+        if response.status_code not in (200, 201, 202):
+            try:
+                response_json = response.json()
+            except Exception:
+                response_json = {}
+            error_msg = response_json.get("message") or f"HTTP {response.status_code}"
+            raise RuntimeError(f"Brevo API error: {error_msg}")
 
         log_email_delivery(
             application_id=application_id,
@@ -445,12 +459,12 @@ def send_status_change_email(
             delivery_status="success",
             error_message=None,
         )
-        print(f"[email_service] ✅ Email sent: {recipient_email} ({new_status})")
+        print(f"[email_service] ✅ Email sent via Brevo: {recipient_email} ({new_status})")
         return True
 
-    except Exception as smtp_err:
-        error_msg = str(smtp_err)
-        print(f"[email_service] ❌ SMTP error: {error_msg}")
+    except Exception as err:
+        error_msg = str(err)
+        print(f"[email_service] ❌ Brevo send error: {error_msg}")
         log_email_delivery(
             application_id=application_id,
             recipient_email=recipient_email,
