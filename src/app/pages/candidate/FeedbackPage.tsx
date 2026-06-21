@@ -2,8 +2,9 @@ import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Star, CheckCircle, ChevronRight, MessageSquare, Sparkles, Heart, Cpu } from "lucide-react";
+import { apiUrl } from "../../utils/apiConfig";
 
-const API_BASE = "/api/candidate";
+const API_BASE = apiUrl("/api/candidate");
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem("access_token");

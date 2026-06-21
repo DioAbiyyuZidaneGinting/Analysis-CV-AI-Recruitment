@@ -2,6 +2,7 @@ import { motion } from "motion/react";
 import { Download } from "lucide-react";
 import { useCandidateContext, getValidToken } from "./candidateContext";
 import { TEMPLATES } from "./candidateShared";
+import { apiUrl } from "../../utils/apiConfig";
 import harvardPreview from "./harvard_preview.png";
 import atsPreview from "./ats_preview.png";
 
@@ -16,7 +17,7 @@ export function CvTemplatesPage() {
   const handleDownloadStaticTemplate = async (templateId: string) => {
     try {
       const authHeaders = await getValidToken();
-      const response = await fetch(`/api/candidate/templates/download/${templateId}`, {
+      const response = await fetch(apiUrl(`/api/candidate/templates/download/${templateId}`), {
         headers: authHeaders,
       });
       if (response.ok) {
