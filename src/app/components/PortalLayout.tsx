@@ -197,11 +197,9 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
           <div className="p-5 border-b border-black/[0.08]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-                <div className="w-8 h-8 bg-[#0052CC]/[0.08] border border-[#0052CC]/15 rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-[#0052CC]" />
-                </div>
+                <img src="/logo.png" alt="Logo" className="w-8 h-8 object-contain" />
                 <span className="font-bold text-lg text-black tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
-                  Talent<span className="text-[#0052CC]">AI</span>
+                  TalentLens<span className="text-[#0052CC]">AI</span>
                 </span>
               </div>
               <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-muted-foreground hover:text-black transition-colors">

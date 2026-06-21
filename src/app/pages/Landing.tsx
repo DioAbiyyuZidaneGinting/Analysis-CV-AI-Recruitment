@@ -256,9 +256,9 @@ export function LandingPage() {
       {/* ── NAV ── */}
       <nav className="fixed top-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-[1440px] z-50">
         <div className="bg-white/80 backdrop-blur-xl border border-black/5 rounded-3xl h-16 flex justify-between items-center px-8 shadow-sm">
-          <div style={{ fontFamily: "var(--font-display)" }} className="text-[18px] font-extrabold tracking-tighter uppercase flex items-center gap-2">
-            <span className="w-2 h-2 bg-black rounded-full" />
-            TalentLensAI
+          <div style={{ fontFamily: "var(--font-display)" }} className="text-[18px] font-extrabold tracking-tighter flex items-center gap-2">
+            <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
+            <span>TalentLens<span className="text-[#0052CC]">AI</span></span>
           </div>
           <div className="hidden lg:flex gap-8 items-center mono-label font-semibold">
             <a href="#" className="hover:opacity-40 transition-opacity">[ Home ]</a>
@@ -415,9 +415,9 @@ export function LandingPage() {
         <div className="max-w-[1440px] mx-auto px-8 lg:px-16">
           <div className="grid grid-cols-12 gap-8 mb-20">
             <div className="col-span-12 lg:col-span-6">
-              <div style={{ fontFamily: "var(--font-display)" }} className="text-2xl font-extrabold uppercase tracking-tighter mb-8 flex items-center gap-2">
-                <div className="w-3 h-3 bg-black rounded-sm" />
-                TalentLensAI
+              <div style={{ fontFamily: "var(--font-display)" }} className="text-2xl font-extrabold tracking-tighter mb-8 flex items-center gap-2">
+                <img src="/logo.png" alt="Logo" className="w-6 h-6 object-contain" />
+                <span>TalentLens<span className="text-[#0052CC]">AI</span></span>
               </div>
               <p className="opacity-60 max-w-xs text-base leading-relaxed">
                 Precision recruitment architecture. System build 2026.06.20 // Distributed via Neural Grid.

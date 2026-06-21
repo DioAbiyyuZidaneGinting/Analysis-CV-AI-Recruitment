@@ -45,10 +45,54 @@ interface Candidate {
   appliedJobs: any[];
 }
 
+const WORKFLOW: Record<string, { next: string[]; reject: boolean }> = {
+  submitted: { next: ["screening"], reject: true },
+  screening: { next: ["interview"], reject: true },
+  interview: { next: ["offered"], reject: true },
+  offered: { next: ["accepted"], reject: true },
+  accepted: { next: [], reject: false },
+  rejected: { next: [], reject: false },
+};
+
+const STATUS_LABELS: Record<string, string> = {
+  submitted: "Applied",
+  screening: "Screening",
+  interview: "Interview",
+  offered: "Offered",
+  accepted: "Accepted",
+  rejected: "Rejected",
+};
+
+const STATUS_COLORS: Record<string, string> = {
+  submitted: "bg-[#0052CC]/[0.06] text-[#0052CC] border border-[#0052CC]/15",
+  screening: "bg-amber-500/[0.06] text-amber-700 border border-amber-500/15",
+  interview: "bg-violet-500/[0.06] text-violet-700 border border-violet-500/15",
+  offered: "bg-pink-500/[0.06] text-pink-700 border border-pink-500/15",
+  accepted: "bg-emerald-500/[0.06] text-emerald-700 border border-emerald-500/15",
+  rejected: "bg-rose-500/[0.06] text-rose-700 border border-rose-500/15",
+};
+
+const NEXT_LABEL: Record<string, string> = {
+  submitted: "Move to Screening",
+  screening: "Move to Interview",
+  interview: "Move to Offered",
+  offered: "Accept Candidate",
+};
+
+const NEXT_COLOR: Record<string, string> = {
+  submitted: "bg-amber-600 hover:bg-amber-700 shadow-amber-600/10",
+  screening: "bg-indigo-600 hover:bg-indigo-700 shadow-indigo-600/10",
+  interview: "bg-pink-650 hover:bg-pink-700 shadow-pink-650/10",
+  offered: "bg-emerald-500 hover:bg-emerald-600 shadow-emerald-500/10",
+};
+
 function CandidateDetailPanel({ candidate, onClose, onAction }: {
   candidate: Candidate; onClose: () => void;
-  onAction: (candidateId: string, action: "accepted" | "rejected") => void;
+  onAction: (candidateId: string, action: string) => void;
 }) {
+  const workflow = WORKFLOW[candidate.status];
+  const nextStatus = workflow?.next[0] ?? null;
+
   const statusColors = (status: string) => {
     const s = status.toLowerCase();
     if (s === "accepted") return "bg-emerald-50 text-emerald-700 border-emerald-200/60";
@@ -77,7 +121,7 @@ function CandidateDetailPanel({ candidate, onClose, onAction }: {
               <p className="text-slate-500 text-xs mt-0.5 font-medium">{candidate.role}</p>
               <span className={`inline-flex items-center gap-1 mt-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full border ${statusColors(candidate.status)}`}>
                 <span className="w-1 h-1 rounded-full bg-current" />
-                {candidate.status.charAt(0).toUpperCase() + candidate.status.slice(1)}
+                {STATUS_LABELS[candidate.status] || candidate.status}
               </span>
             </div>
           </div>
@@ -118,7 +162,7 @@ function CandidateDetailPanel({ candidate, onClose, onAction }: {
             <h3 className="font-extrabold text-xs uppercase tracking-wider text-purple-200" style={{ fontFamily: 'var(--font-display)' }}>AI Candidate Insights</h3>
           </div>
           <p className="text-xs text-slate-200 leading-relaxed font-normal relative z-10 mb-4">{candidate.aiNote}</p>
-          
+
           <div className="grid grid-cols-3 gap-3 relative z-10">
             {[
               { score: candidate.cvScore, label: "CV Score", color: "from-blue-500/20 to-indigo-500/20 border-blue-500/30 text-blue-300" },
@@ -138,7 +182,7 @@ function CandidateDetailPanel({ candidate, onClose, onAction }: {
           <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-400 mb-1" style={{ fontFamily: 'var(--font-display)' }}>Match Performance</h3>
           <div className="space-y-3.5">
             {[
-              {label: "Technical Skills Match", score: candidate.cvScore || 0, color: "bg-[#0052CC]"},
+              { label: "Technical Skills Match", score: candidate.cvScore || 0, color: "bg-[#0052CC]" },
               { label: "AI Cultural Fit Prediction", score: candidate.culturalFitScore || 70, color: "bg-indigo-600" },
               { label: "AI Communication Assessment", score: candidate.communicationScore || 70, color: "bg-pink-500" },
               { label: "Experience Relevance Alignment", score: candidate.skillScore || 60, color: "bg-emerald-500" },
@@ -174,12 +218,11 @@ function CandidateDetailPanel({ candidate, onClose, onAction }: {
                     <p className="font-bold text-xs text-slate-700">{job.title}</p>
                     <p className="text-[10px] text-slate-400 font-medium">{job.department} · {job.appliedAt}</p>
                   </div>
-                  <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full border ${
-                    job.status.toLowerCase() === 'accepted' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' :
-                    job.status.toLowerCase() === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-200/60' :
-                    'bg-sky-50 text-sky-700 border-sky-200/60'
-                  }`}>
-                    {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                  <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full border ${job.status.toLowerCase() === 'accepted' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' :
+                      job.status.toLowerCase() === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-200/60' :
+                        'bg-sky-50 text-sky-700 border-sky-200/60'
+                    }`}>
+                    {STATUS_LABELS[job.status.toLowerCase()] || job.status}
                   </span>
                 </div>
               ))
@@ -204,24 +247,35 @@ function CandidateDetailPanel({ candidate, onClose, onAction }: {
 
       {/* Sticky Bottom Actions */}
       <div className="p-4 bg-white border-t border-slate-100 flex gap-3 shadow-inner">
-        {candidate.status !== "accepted" && candidate.status !== "rejected" && (
+        {candidate.status !== "accepted" && candidate.status !== "rejected" ? (
           <>
-            <button
-              onClick={() => onAction(candidate.id, "accepted")}
-              className="flex-1 flex items-center justify-center gap-2 bg-emerald-500 text-white hover:bg-emerald-600 py-3 rounded-xl font-bold text-sm transition-all shadow-md shadow-emerald-500/10 active:scale-[0.98]"
-            >
-              <ThumbsUp className="w-4 h-4" /> Accept
-            </button>
-            <button
-              onClick={() => onAction(candidate.id, "rejected")}
-              className="flex-1 flex items-center justify-center gap-2 bg-rose-500 text-white hover:bg-rose-600 py-3 rounded-xl font-bold text-sm transition-all shadow-md shadow-rose-500/10 active:scale-[0.98]"
-            >
-              <ThumbsDown className="w-4 h-4" /> Reject
-            </button>
+            {nextStatus && (
+              <button
+                onClick={() => onAction(candidate.id, nextStatus)}
+                className={`flex-1 flex items-center justify-center gap-2 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-md active:scale-[0.98] ${NEXT_COLOR[candidate.status] || "bg-[#0052CC] hover:bg-[#0052CC]/90"}`}
+              >
+                <ThumbsUp className="w-4 h-4" /> {NEXT_LABEL[candidate.status] || `Move to ${STATUS_LABELS[nextStatus]}`}
+              </button>
+            )}
+            {workflow?.reject && (
+              <button
+                onClick={() => onAction(candidate.id, "rejected")}
+                className="flex-1 flex items-center justify-center gap-2 bg-rose-500 text-white hover:bg-rose-600 py-3 rounded-xl font-bold text-sm transition-all shadow-md shadow-rose-500/10 active:scale-[0.98]"
+              >
+                <ThumbsDown className="w-4 h-4" /> Reject
+              </button>
+            )}
           </>
+        ) : (
+          <div className={`flex-1 flex items-center justify-center gap-2 px-3 py-3 rounded-xl text-xs font-bold border ${candidate.status === "accepted"
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+              : "bg-rose-50 text-rose-700 border-rose-200"
+            }`}>
+            {candidate.status === "accepted" ? "Candidate Accepted — Final stage" : "Candidate Rejected Final stage"}
+          </div>
         )}
-        
-        <button 
+
+        <button
           onClick={async () => {
             try {
               const res = await authFetch(apiUrl(`/api/recruiter/candidate/${candidate.id}/cv-url`));
@@ -273,7 +327,7 @@ export function CandidatesPage() {
     fetchCandidates();
   }, []);
 
-  const handleAction = async (candidateId: string, action: "accepted" | "rejected") => {
+  const handleAction = async (candidateId: string, action: string) => {
     try {
       const res = await authFetch(apiUrl(`/api/recruiter/candidate/${candidateId}/action`), {
         method: "POST",
@@ -424,8 +478,8 @@ export function CandidatesPage() {
               </div>
 
               {/* Status */}
-              <span className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-[#0052CC]/[0.06] text-[#0052CC] border border-[#0052CC]/15 flex-shrink-0">
-                {c.status.charAt(0).toUpperCase() + c.status.slice(1)}
+              <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border flex-shrink-0 ${STATUS_COLORS[c.status] || "bg-[#0052CC]/[0.06] text-[#0052CC] border-[#0052CC]/15"}`}>
+                {STATUS_LABELS[c.status] || c.status}
               </span>
 
               <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors flex-shrink-0" />

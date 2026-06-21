@@ -15,7 +15,7 @@ function getAuthHeaders(): Record<string, string> {
 function StarRating({
   value,
   onChange,
-  size = 32,
+  size = 28,
 }: {
   value: number;
   onChange: (v: number) => void;
@@ -23,23 +23,22 @@ function StarRating({
 }) {
   const [hovered, setHovered] = useState(0);
   return (
-    <div className="flex gap-1" onMouseLeave={() => setHovered(0)}>
+    <div className="flex gap-2" onMouseLeave={() => setHovered(0)}>
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
           type="button"
           onClick={() => onChange(star)}
           onMouseEnter={() => setHovered(star)}
-          className="transition-transform hover:scale-110 focus:outline-none"
-          style={{ fontSize: size }}
+          className="transition-all hover:scale-125 focus:outline-none"
           aria-label={`${star} star`}
         >
           <Star
             style={{ width: size, height: size }}
-            className={`transition-colors ${
+            className={`transition-all duration-200 ${
               star <= (hovered || value)
-                ? "text-yellow-400 fill-yellow-400"
-                : "text-gray-200 fill-gray-200"
+                ? "text-[#ff8f00] fill-[#ff8f00] scale-110 drop-shadow-sm"
+                : "text-black/[0.08] fill-transparent"
             }`}
           />
         </button>
@@ -50,10 +49,16 @@ function StarRating({
 
 // ─── NPS Slider Component ─────────────────────────────────────────────────────
 function NpsSelector({ value, onChange }: { value: number; onChange: (v: number) => void }) {
-  const getColor = (score: number) => {
-    if (score <= 6) return "#ef4444";
-    if (score <= 8) return "#f59e0b";
-    return "#22c55e";
+  const getColorClass = (score: number, isSelected: boolean) => {
+    if (!isSelected) return "bg-white text-black border border-black/[0.08] hover:border-black/20 hover:bg-black/[0.01]";
+    if (score <= 6) return "bg-red-500 border border-red-600 text-white shadow-sm";
+    if (score <= 8) return "bg-amber-500 border border-amber-600 text-white shadow-sm";
+    return "bg-emerald-500 border border-emerald-600 text-white shadow-sm";
+  };
+  const getTextColor = (score: number) => {
+    if (score <= 6) return "text-red-600";
+    if (score <= 8) return "text-amber-600";
+    return "text-emerald-600";
   };
   const getLabel = (score: number) => {
     if (score <= 6) return "Detractor";
@@ -62,36 +67,31 @@ function NpsSelector({ value, onChange }: { value: number; onChange: (v: number)
   };
 
   return (
-    <div>
-      <div className="flex gap-1.5 flex-wrap justify-center mb-3">
-        {Array.from({ length: 11 }, (_, i) => i).map((n) => (
-          <button
-            key={n}
-            type="button"
-            onClick={() => onChange(n)}
-            className={`w-10 h-10 rounded-xl text-sm font-black transition-all ${
-              value === n
-                ? "text-white scale-110 shadow-lg"
-                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-            }`}
-            style={value === n ? { backgroundColor: getColor(n) } : {}}
-            aria-label={`Score ${n}`}
-          >
-            {n}
-          </button>
-        ))}
+    <div className="space-y-4">
+      <div className="grid grid-cols-11 gap-1 md:gap-1.5">
+        {Array.from({ length: 11 }, (_, i) => i).map((n) => {
+          const isSelected = value === n;
+          return (
+            <button
+              key={n}
+              type="button"
+              onClick={() => onChange(n)}
+              className={`py-3 rounded-lg text-xs font-bold font-mono transition-all text-center ${getColorClass(n, isSelected)}`}
+              aria-label={`Score ${n}`}
+            >
+              {n}
+            </button>
+          );
+        })}
       </div>
       {value >= 0 && (
-        <p
-          className="text-center text-sm font-bold"
-          style={{ color: getColor(value) }}
-        >
-          {getLabel(value)}
+        <p className={`text-center text-xs font-mono uppercase tracking-wider ${getTextColor(value)}`}>
+          // Status: {getLabel(value)}
         </p>
       )}
-      <div className="flex justify-between text-xs text-muted-foreground mt-1 px-1">
-        <span>Not at all</span>
-        <span>Extremely likely</span>
+      <div className="flex justify-between text-[10px] font-mono text-[#666666] uppercase px-1">
+        <span>[ 0 - Not at all likely ]</span>
+        <span>[ 10 - Extremely likely ]</span>
       </div>
     </div>
   );
@@ -203,22 +203,22 @@ export function FeedbackPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="text-center max-w-md"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center max-w-md bg-white rounded-xl border border-black/[0.08] p-12 shadow-sm"
         >
-          <div className="w-20 h-20 bg-[#dcfce7] rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="w-10 h-10 text-emerald-600" />
+          <div className="w-16 h-16 bg-[#dcfce7] border border-emerald-200/50 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="w-8 h-8 text-emerald-600" />
           </div>
-          <h1 className="text-2xl font-black text-foreground mb-2" style={{ fontFamily: "var(--font-display)" }}>
+          <h1 className="text-3xl font-black text-black tracking-tighter mb-3" style={{ fontFamily: "var(--font-display)" }}>
             Thank You! 🙏
           </h1>
-          <p className="text-muted-foreground mb-8">
-            Your feedback has been submitted. It helps us make TalentLens AI better for everyone.
+          <p className="text-sm text-[#666666] leading-relaxed mb-8">
+            Your feedback has been successfully registered. This helps us optimize and refine TalentLens AI for future candidates.
           </p>
           <button
             onClick={() => navigate("/candidate/dashboard")}
-            className="bg-primary text-white px-6 py-3 rounded-xl font-bold hover:bg-primary/90 transition-colors"
+            className="bg-[#0052CC] text-white px-6 py-3 rounded-lg font-bold text-xs hover:bg-[#0052CC]/90 transition-all font-mono uppercase tracking-wider"
           >
             Back to Dashboard
           </button>
@@ -231,7 +231,7 @@ export function FeedbackPage() {
   if (loadingEligible) {
     return (
       <div className="flex items-center justify-center min-h-[40vh]">
-        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <div className="w-8 h-8 border-2 border-[#0052CC] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -240,17 +240,19 @@ export function FeedbackPage() {
   if (eligible.length === 0) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="text-center max-w-sm">
-          <div className="w-16 h-16 bg-[#e9d5ff] rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Heart className="w-8 h-8 text-primary" />
+        <div className="text-center max-w-sm bg-white rounded-xl border border-black/[0.08] p-10 shadow-sm">
+          <div className="w-16 h-16 bg-[#0052CC]/5 border border-[#0052CC]/15 rounded-xl flex items-center justify-center mx-auto mb-6">
+            <Heart className="w-8 h-8 text-[#0052CC]" />
           </div>
-          <h2 className="text-xl font-black text-foreground mb-2">No Feedback Pending</h2>
-          <p className="text-muted-foreground text-sm mb-6">
+          <h2 className="text-2xl font-black text-black tracking-tighter mb-2" style={{ fontFamily: "var(--font-display)" }}>
+            No Feedback Pending
+          </h2>
+          <p className="text-[#666666] text-sm leading-relaxed mb-8">
             You can submit feedback once an application reaches accepted or rejected status.
           </p>
           <button
             onClick={() => navigate("/candidate/dashboard")}
-            className="bg-primary text-white px-5 py-2.5 rounded-xl font-bold hover:bg-primary/90 transition-colors text-sm"
+            className="bg-[#0052CC] text-white px-6 py-3 rounded-lg font-bold text-xs hover:bg-[#0052CC]/90 transition-all font-mono uppercase tracking-wider"
           >
             Back to Dashboard
           </button>
@@ -260,50 +262,65 @@ export function FeedbackPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
+    <div className="max-w-2xl mx-auto space-y-8">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-black text-foreground" style={{ fontFamily: "var(--font-display)" }}>
-          Share Your Experience ⭐
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 text-[10px] font-mono text-[#0052CC] tracking-widest uppercase">
+          <span>[ SYSTEM PORTAL: CANDIDATE FEEDBACK ]</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#0052CC] animate-pulse"></span>
+        </div>
+        <h1
+          className="text-3xl md:text-5xl font-black tracking-tighter text-black leading-none"
+          style={{ fontFamily: "var(--font-display)" }}
+        >
+          Share Your <span className="text-[#0052CC]">Experience</span>.
         </h1>
-        <p className="text-muted-foreground mt-1">
-          Help us improve TalentLens AI with your honest feedback.
+        <p className="text-sm text-[#666666] leading-relaxed max-w-2xl pt-2">
+          Help us improve TalentLens AI by submitting your system feedback below.
         </p>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6">
 
         {/* Application selector */}
         {eligible.length > 1 && (
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
-            <h2 className="font-black text-base text-foreground mb-4" style={{ fontFamily: "var(--font-display)" }}>
-              Select Application
+          <div className="bg-white rounded-xl border border-black/[0.08] p-8 space-y-4">
+            <div className="text-[10px] font-mono text-[#0052CC] tracking-widest uppercase">
+              [ SELECT AN APPLICATION TO REVIEW ]
+            </div>
+            <h2 className="font-black text-xl tracking-tighter text-black" style={{ fontFamily: "var(--font-display)" }}>
+              Target Application
             </h2>
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {eligible.map((app) => (
                 <button
                   key={app.applicationId}
                   type="button"
                   onClick={() => setSelectedAppId(app.applicationId)}
-                  className={`w-full flex items-center justify-between p-3.5 rounded-xl border text-left transition-all ${
+                  className={`p-5 rounded-lg border text-left transition-all flex flex-col justify-between ${
                     selectedAppId === app.applicationId
-                      ? "border-primary bg-primary/5"
-                      : "border-black/[0.06] hover:border-primary/30"
+                      ? "border-[#0052CC] bg-[#0052CC]/5 shadow-sm"
+                      : "border-black/[0.08] hover:border-black/20 hover:bg-black/[0.01]"
                   }`}
                 >
                   <div>
-                    <p className="font-semibold text-sm text-foreground">{app.jobTitle}</p>
-                    <p className="text-xs text-muted-foreground">{app.department}</p>
+                    <p className="font-bold text-sm text-black">{app.jobTitle}</p>
+                    <p className="text-[10px] font-mono text-[#666666] uppercase mt-1">[{app.department}]</p>
                   </div>
-                  <span
-                    className={`text-xs font-bold px-2.5 py-1 rounded-full ${
-                      app.status === "accepted"
-                        ? "bg-[#dcfce7] text-emerald-700"
-                        : "bg-[#fee2e2] text-red-700"
-                    }`}
-                  >
-                    {app.status.charAt(0).toUpperCase() + app.status.slice(1)}
-                  </span>
+                  <div className="mt-4 flex justify-between items-center w-full">
+                    <span
+                      className={`text-[9px] font-mono tracking-wider uppercase px-2.5 py-1 rounded-md border ${
+                        app.status === "accepted"
+                          ? "bg-emerald-50 border-emerald-200/50 text-emerald-700"
+                          : "bg-red-50 border-red-200/50 text-red-700"
+                      }`}
+                    >
+                      {app.status}
+                    </span>
+                    {selectedAppId === app.applicationId && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#0052CC]"></span>
+                    )}
+                  </div>
                 </button>
               ))}
             </div>
@@ -311,52 +328,60 @@ export function FeedbackPage() {
         )}
 
         {selectedApp && eligible.length === 1 && (
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-4 flex items-center justify-between">
+          <div className="bg-white rounded-xl border border-black/[0.08] p-6 flex items-center justify-between">
             <div>
-              <p className="font-bold text-sm text-foreground">{selectedApp.jobTitle}</p>
-              <p className="text-xs text-muted-foreground">{selectedApp.department}</p>
+              <p className="font-bold text-base text-black">{selectedApp.jobTitle}</p>
+              <p className="text-[10px] font-mono text-[#666666] uppercase mt-0.5">[{selectedApp.department}]</p>
             </div>
             <span
-              className={`text-xs font-bold px-2.5 py-1 rounded-full ${
+              className={`text-[9px] font-mono tracking-wider uppercase px-2.5 py-1 rounded-md border ${
                 selectedApp.status === "accepted"
-                  ? "bg-[#dcfce7] text-emerald-700"
-                  : "bg-[#fee2e2] text-red-700"
+                  ? "bg-emerald-50 border-emerald-200/50 text-emerald-700"
+                  : "bg-red-50 border-red-200/50 text-red-700"
               }`}
             >
-              {selectedApp.status.charAt(0).toUpperCase() + selectedApp.status.slice(1)}
+              {selectedApp.status}
             </span>
           </div>
         )}
 
         {/* Star Ratings */}
-        <div className="bg-white rounded-2xl border border-black/[0.06] p-6 space-y-6">
-          <h2 className="font-black text-base text-foreground" style={{ fontFamily: "var(--font-display)" }}>
+        <div className="bg-white rounded-xl border border-black/[0.08] p-8 space-y-6">
+          <div className="text-[10px] font-mono text-[#0052CC] tracking-widest uppercase">
+            [ RATING METRICS ]
+          </div>
+          <h2 className="font-black text-xl tracking-tighter text-black" style={{ fontFamily: "var(--font-display)" }}>
             Rate Your Experience
           </h2>
-          {ratings.map(({ key, label, icon, desc }) => (
-            <div key={key}>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-lg">{icon}</span>
-                <p className="font-semibold text-sm text-foreground">{label}</p>
+          <div className="space-y-6 divide-y divide-black/[0.06]">
+            {ratings.map(({ key, label, icon, desc }, idx) => (
+              <div key={key} className={idx > 0 ? "pt-6" : ""}>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-lg">{icon}</span>
+                  <p className="font-bold text-sm text-black">{label}</p>
+                </div>
+                <p className="text-[10px] font-mono text-[#666666] uppercase mb-4">// {desc}</p>
+                <StarRating
+                  value={form[key]}
+                  onChange={(v) => setForm((prev) => ({ ...prev, [key]: v }))}
+                />
               </div>
-              <p className="text-xs text-muted-foreground mb-2">{desc}</p>
-              <StarRating
-                value={form[key]}
-                onChange={(v) => setForm((prev) => ({ ...prev, [key]: v }))}
-              />
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         {/* NPS */}
-        <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+        <div className="bg-white rounded-xl border border-black/[0.08] p-8 space-y-4">
+          <div className="text-[10px] font-mono text-[#0052CC] tracking-widest uppercase">
+            [ PROMOTER SCORE ]
+          </div>
           <div className="flex items-center gap-2 mb-1">
-            <Sparkles className="w-4 h-4 text-primary" />
-            <h2 className="font-black text-base text-foreground" style={{ fontFamily: "var(--font-display)" }}>
+            <Sparkles className="w-4 h-4 text-[#0052CC]" />
+            <h2 className="font-black text-xl tracking-tighter text-black" style={{ fontFamily: "var(--font-display)" }}>
               Would you recommend TalentLens AI?
             </h2>
           </div>
-          <p className="text-xs text-muted-foreground mb-5">
+          <p className="text-xs text-[#666666]">
             On a scale of 0–10, how likely are you to recommend TalentLens AI to a friend or colleague?
           </p>
           <NpsSelector
@@ -366,15 +391,18 @@ export function FeedbackPage() {
         </div>
 
         {/* Favorite Feature */}
-        <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+        <div className="bg-white rounded-xl border border-black/[0.08] p-8 space-y-4">
+          <div className="text-[10px] font-mono text-[#0052CC] tracking-widest uppercase">
+            [ METRIC ALIGNMENT ]
+          </div>
           <div className="flex items-center gap-2 mb-1">
-            <Cpu className="w-4 h-4 text-primary" />
-            <h2 className="font-black text-base text-foreground" style={{ fontFamily: "var(--font-display)" }}>
+            <Cpu className="w-4 h-4 text-[#0052CC]" />
+            <h2 className="font-black text-xl tracking-tighter text-black" style={{ fontFamily: "var(--font-display)" }}>
               What did you like most?
             </h2>
           </div>
-          <p className="text-xs text-muted-foreground mb-4">Select the feature that impressed you the most.</p>
-          <div className="grid grid-cols-2 gap-2">
+          <p className="text-xs text-[#666666]">Select the platform features that impressed you the most during your journey.</p>
+          <div className="grid grid-cols-2 gap-3">
             {FEATURES.map((feat) => (
               <button
                 key={feat}
@@ -385,10 +413,10 @@ export function FeedbackPage() {
                     favorite_feature: prev.favorite_feature === feat ? "" : feat,
                   }))
                 }
-                className={`p-3 rounded-xl border text-sm font-semibold text-left transition-all ${
+                className={`p-4 rounded-lg border text-xs font-bold text-left transition-all ${
                   form.favorite_feature === feat
-                    ? "border-primary bg-primary/10 text-primary"
-                    : "border-black/[0.06] text-foreground hover:border-primary/30 hover:bg-muted/50"
+                    ? "border-[#0052CC] bg-[#0052CC]/5 text-black shadow-sm"
+                    : "border-black/[0.08] text-[#666666] hover:border-black/20 hover:text-black"
                 }`}
               >
                 {feat}
@@ -398,14 +426,17 @@ export function FeedbackPage() {
         </div>
 
         {/* Comment */}
-        <div className="bg-white rounded-2xl border border-black/[0.06] p-6">
+        <div className="bg-white rounded-xl border border-black/[0.08] p-8 space-y-4">
+          <div className="text-[10px] font-mono text-[#0052CC] tracking-widest uppercase">
+            [ USER THOUGHTS ]
+          </div>
           <div className="flex items-center gap-2 mb-1">
-            <MessageSquare className="w-4 h-4 text-primary" />
-            <h2 className="font-black text-base text-foreground" style={{ fontFamily: "var(--font-display)" }}>
+            <MessageSquare className="w-4 h-4 text-[#0052CC]" />
+            <h2 className="font-black text-xl tracking-tighter text-black" style={{ fontFamily: "var(--font-display)" }}>
               Any additional comments?
             </h2>
           </div>
-          <p className="text-xs text-muted-foreground mb-3">Optional — share anything else you'd like us to know.</p>
+          <p className="text-xs text-[#666666]">Optional — share anything else you'd like us to know.</p>
           <textarea
             id="feedback-comment"
             value={form.comment}
@@ -413,9 +444,9 @@ export function FeedbackPage() {
             rows={4}
             maxLength={1000}
             placeholder="Your experience, suggestions, or anything you'd like to share..."
-            className="w-full border border-black/[0.08] rounded-xl p-3.5 text-sm text-foreground resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all placeholder:text-muted-foreground"
+            className="w-full border border-black/[0.08] rounded-lg p-4 text-xs text-black font-mono resize-none focus:outline-none focus:ring-2 focus:ring-[#0052CC]/15 focus:border-[#0052CC]/30 transition-all placeholder:text-[#666666]/50 bg-black/[0.005]"
           />
-          <p className="text-xs text-muted-foreground text-right mt-1">{form.comment.length}/1000</p>
+          <p className="text-[10px] font-mono text-[#666666] text-right mt-1">{form.comment.length}/1000</p>
         </div>
 
         {/* Error */}
@@ -436,7 +467,7 @@ export function FeedbackPage() {
         <button
           type="submit"
           disabled={!canSubmit || submitting}
-          className="w-full flex items-center justify-center gap-2 bg-primary text-white py-3.5 rounded-xl font-black text-sm hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+          className="w-full flex items-center justify-center gap-2 bg-[#0052CC] text-white py-4 rounded-lg font-bold text-xs disabled:opacity-50 disabled:cursor-not-allowed transition-all font-mono uppercase tracking-wider"
         >
           {submitting ? (
             <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -448,11 +479,12 @@ export function FeedbackPage() {
         </button>
 
         {!canSubmit && (
-          <p className="text-xs text-muted-foreground text-center">
-            Please complete all ratings and the NPS score before submitting.
+          <p className="text-[10px] font-mono text-[#666666] text-center uppercase tracking-wider pt-2">
+            // Fill all ratings and NPS score to enable submission
           </p>
         )}
       </form>
     </div>
   );
 }
+
