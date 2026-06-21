@@ -282,6 +282,8 @@ export function CandidatesPage() {
 
   useEffect(() => {
     fetchCandidates();
+    const interval = setInterval(fetchCandidates, 10000); // Polling every 10 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const handleAction = async (candidateId: string, action: "accepted" | "rejected") => {

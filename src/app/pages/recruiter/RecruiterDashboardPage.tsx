@@ -329,6 +329,11 @@ export function RecruiterDashboardPage() {
   useEffect(() => {
     fetchCandidates();
     fetchJobs();
+    const interval = setInterval(() => {
+      fetchCandidates();
+      fetchJobs();
+    }, 10000); // Polling every 10 seconds
+    return () => clearInterval(interval);
   }, []);
 
   const handleAction = async (candidateId: string, action: "accepted" | "rejected") => {

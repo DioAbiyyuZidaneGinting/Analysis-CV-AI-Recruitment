@@ -56,7 +56,7 @@ def get_candidates(user):
 @require_auth(allowed_roles=["recruiter", "admin"])
 def candidate_action(user, candidate_id: str):
     """
-    Update the application status for a candidate.
+    Update the application status for a candidate or specific application.
     SECURITY: Only updates applications to jobs owned by this recruiter.
     Enforces stage-by-stage workflow:
       submitted -> screening -> interview -> offered -> accepted/rejected
@@ -72,6 +72,41 @@ def candidate_action(user, candidate_id: str):
     if action not in valid_statuses:
         return jsonify({"error": f"Invalid status '{action}'. Must be one of: {valid_statuses}"}), 400
 
+    # Fetch the recruiter's jobs to scope the lookup
+    recruiter_jobs = supabase.table("jobs").select("id").eq("recruiter_id", user.id).execute()
+    job_ids = [j["id"] for j in (recruiter_jobs.data or [])]
+    if not job_ids:
+        return jsonify({"error": "No jobs found for this recruiter"}), 404
+
+    # Check if the parameter is actually an application ID
+    app_check = supabase.table("applications") \
+        .select("id, status, candidate_id") \
+        .eq("id", candidate_id) \
+        .maybe_single().execute()
+
+    is_app_id = False
+    if app_check and app_check.data:
+        is_app_id = True
+        app_id = app_check.data["id"]
+        current_status = app_check.data["status"]
+        real_candidate_id = app_check.data["candidate_id"]
+    else:
+        # Look up the current application status — ORDER BY applied_at DESC
+        app_res = supabase.table("applications") \
+            .select("id, status, candidate_id") \
+            .eq("candidate_id", candidate_id) \
+            .in_("job_id", job_ids) \
+            .order("applied_at", desc=True) \
+            .limit(1) \
+            .maybe_single().execute()
+
+        if not app_res or not app_res.data:
+            return jsonify({"error": "Candidate or application not found, or not authorized"}), 404
+
+        app_id = app_res.data["id"]
+        current_status = app_res.data["status"]
+        real_candidate_id = app_res.data["candidate_id"]
+
     # ── Enforce workflow transitions ──────────────────────────────────────────
     ALLOWED_TRANSITIONS = {
         "submitted": ["screening", "rejected"],
@@ -81,29 +116,6 @@ def candidate_action(user, candidate_id: str):
         "accepted":   [],   # final state
         "rejected":   [],   # final state
     }
-
-    # Fetch the recruiter's jobs to scope the lookup
-    recruiter_jobs = supabase.table("jobs").select("id").eq("recruiter_id", user.id).execute()
-    job_ids = [j["id"] for j in (recruiter_jobs.data or [])]
-    if not job_ids:
-        return jsonify({"error": "No jobs found for this recruiter"}), 404
-
-    # Look up the current application status — ORDER BY applied_at DESC to match
-    # the same "most recent application" logic used by update_application_status.
-    # Without this, candidates with multiple applications would have the status
-    # checked on a different (older) application than the one being updated.
-    app_res = supabase.table("applications") \
-        .select("id, status") \
-        .eq("candidate_id", candidate_id) \
-        .in_("job_id", job_ids) \
-        .order("applied_at", desc=True) \
-        .limit(1) \
-        .maybe_single().execute()
-
-    if not app_res or not app_res.data:
-        return jsonify({"error": "Candidate or application not found, or not authorized"}), 404
-
-    current_status = app_res.data.get("status", "submitted")
 
     allowed_next = ALLOWED_TRANSITIONS.get(current_status, [])
     if action not in allowed_next and action != current_status:
@@ -116,16 +128,15 @@ def candidate_action(user, candidate_id: str):
     # ── End workflow guard ────────────────────────────────────────────────────
 
     success = update_application_status(
-        candidate_id=candidate_id,
+        candidate_id=real_candidate_id,
         new_status=action,
-        recruiter_id=user.id  # scoped to this recruiter's jobs
+        recruiter_id=user.id,  # scoped to this recruiter's jobs
+        application_id=app_id
     )
     if not success:
         return jsonify({"error": "Failed to update application status"}), 500
 
     return jsonify({"message": f"Candidate status updated to '{action}'"}), 200
-
-
 
 
 @recruiter_bp.route("/candidate/<string:candidate_id>/cv-url", methods=["GET"])
@@ -136,6 +147,17 @@ def get_cv_download_url(user, candidate_id: str):
     SECURITY: Signed URLs expire in 1 hour. No public URLs are ever generated.
     """
     from services.supabase_service import supabase
+
+    # Check if the parameter is actually an application ID
+    app_res = supabase.table("applications") \
+        .select("candidate_id") \
+        .eq("id", candidate_id) \
+        .maybe_single().execute()
+    if app_res and app_res.data:
+        real_candidate_id = app_res.data["candidate_id"]
+    else:
+        real_candidate_id = candidate_id
+
     # Verify candidate applied to one of this recruiter's jobs before granting URL
     recruiter_jobs = supabase.table("jobs").select("id").eq("recruiter_id", user.id).execute()
     job_ids = [j["id"] for j in (recruiter_jobs.data or [])]
@@ -145,7 +167,7 @@ def get_cv_download_url(user, candidate_id: str):
     # Check if this candidate applied to any of the recruiter's jobs
     app_check = supabase.table("applications")\
         .select("id")\
-        .eq("candidate_id", candidate_id)\
+        .eq("candidate_id", real_candidate_id)\
         .in_("job_id", job_ids)\
         .limit(1)\
         .execute()
@@ -156,7 +178,7 @@ def get_cv_download_url(user, candidate_id: str):
     # Get the candidate's active CV path
     cv_res = supabase.table("cvs")\
         .select("file_path, file_name")\
-        .eq("user_id", candidate_id)\
+        .eq("user_id", real_candidate_id)\
         .eq("is_active", True)\
         .order("uploaded_at", desc=True)\
         .limit(1)\

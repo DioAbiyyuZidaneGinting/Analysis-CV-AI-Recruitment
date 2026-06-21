@@ -430,7 +430,11 @@ export function PipelinePage() {
       });
   };
 
-  useEffect(() => { fetchCandidates(); }, []);
+  useEffect(() => {
+    fetchCandidates();
+    const interval = setInterval(fetchCandidates, 10000); // Polling every 10 seconds
+    return () => clearInterval(interval);
+  }, []);
 
   // Called from both detail panel buttons and drag-drop
   const handleMove = async (candidateId: string, newStatus: string) => {

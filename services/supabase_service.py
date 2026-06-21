@@ -526,8 +526,9 @@ def get_hiring_prediction(user_id: str) -> dict | None:
 
 def get_candidates_for_recruiter(recruiter_id: str) -> list[dict]:
     """
-    SECURITY FIX: Get ONLY candidates who applied to jobs owned by this recruiter.
-    Never returns candidates from other recruiters' pipelines.
+    Get candidates who applied to jobs owned by this recruiter.
+    Returns each application as a separate entry (not grouped/deduplicated by candidate).
+    Uses batch queries to prevent N+1 queries.
     """
     try:
         # Step 1: Find all job IDs that belong to this recruiter
@@ -544,9 +545,9 @@ def get_candidates_for_recruiter(recruiter_id: str) -> list[dict]:
             print("[DEBUG] candidates returned: 0")
             return []  # This recruiter has no jobs posted yet
 
-        # Step 2: Find all applications to those jobs
+        # Step 2: Find all applications to those jobs (include jobs(title) nested query)
         applications_res = supabase.table("applications")\
-            .select("candidate_id, job_id, status, applied_at")\
+            .select("id, candidate_id, job_id, status, applied_at, jobs(title)")\
             .in_("job_id", job_ids)\
             .order("applied_at", desc=True)\
             .execute()
@@ -554,101 +555,121 @@ def get_candidates_for_recruiter(recruiter_id: str) -> list[dict]:
         applications = applications_res.data or []
         print(f"[DEBUG] applications found: {len(applications)}")
 
-        # Deduplicate by candidate_id (keep most recent application per candidate)
-        seen_candidates: dict[str, dict] = {}
-        for app in applications:
-            cid = app["candidate_id"]
-            if cid not in seen_candidates:
-                seen_candidates[cid] = app
-
-        if not seen_candidates:
+        if not applications:
             return []
 
-        # Step 3: Fetch each candidate's data
+        # Step 3: Batch fetch user & candidate profile info to prevent N+1 queries
+        candidate_ids = list(set(ap["candidate_id"] for ap in applications))
+
+        # Batch users
+        users_res = supabase.table("users")\
+            .select("id, email, first_name, last_name, created_at")\
+            .in_("id", candidate_ids)\
+            .execute()
+        users_by_id = {u["id"]: u for u in (users_res.data or [])}
+
+        # Batch cv analyses (keep only latest per candidate_id)
+        analyses_res = supabase.table("cv_analysis")\
+            .select("user_id, cv_score, ats_score, job_category, experience_years, detected_skills, "
+                    "improvements, strengths, ai_note, analyzed_at, predicted_category, "
+                    "communication_score, cultural_fit_score, skill_score")\
+            .in_("user_id", candidate_ids)\
+            .execute()
+        analyses_by_id = {}
+        for a in (analyses_res.data or []):
+            uid = a["user_id"]
+            if uid not in analyses_by_id or a.get("analyzed_at", "") > analyses_by_id[uid].get("analyzed_at", ""):
+                analyses_by_id[uid] = a
+
+        # Batch recruitment predictions (keep only latest per candidate_id)
+        preds_res = supabase.table("recruitment_predictions")\
+            .select("user_id, hiring_chance, hiring_recommendation, predicted_at")\
+            .in_("user_id", candidate_ids)\
+            .execute()
+        preds_by_id = {}
+        for p in (preds_res.data or []):
+            uid = p["user_id"]
+            if uid not in preds_by_id or p.get("predicted_at", "") > preds_by_id[uid].get("predicted_at", ""):
+                preds_by_id[uid] = p
+
+        # Batch candidate profiles
+        profiles_res = supabase.table("candidate_profiles")\
+            .select("user_id, location, desired_salary")\
+            .in_("user_id", candidate_ids)\
+            .execute()
+        profiles_by_id = {pr["user_id"]: pr for pr in (profiles_res.data or [])}
+
+        # Batch active CVs (keep only latest per candidate_id)
+        cvs_res = supabase.table("cvs")\
+            .select("user_id, file_path, file_name, uploaded_at")\
+            .in_("user_id", candidate_ids)\
+            .eq("is_active", True)\
+            .execute()
+        cvs_by_id = {}
+        for cv in (cvs_res.data or []):
+            uid = cv["user_id"]
+            if uid not in cvs_by_id or cv.get("uploaded_at", "") > cvs_by_id[uid].get("uploaded_at", ""):
+                cvs_by_id[uid] = cv
+
+        # Batch candidate resumes
+        resumes_res = supabase.table("candidate_resumes")\
+            .select("user_id, resume_json")\
+            .in_("user_id", candidate_ids)\
+            .execute()
+        resumes_by_id = {r["user_id"]: r.get("resume_json") or {} for r in (resumes_res.data or [])}
+
+        # Batch fetch other jobs these candidates applied to
+        all_apps_res = supabase.table("applications")\
+            .select("candidate_id, status, applied_at, jobs(title, department)")\
+            .in_("candidate_id", candidate_ids)\
+            .execute()
+        apps_by_candidate = {}
+        for app_row in (all_apps_res.data or []):
+            uid = app_row["candidate_id"]
+            if uid not in apps_by_candidate:
+                apps_by_candidate[uid] = []
+            j = app_row.get("jobs") or {}
+            apps_by_candidate[uid].append({
+                "title": j.get("title", "Unknown Role"),
+                "department": j.get("department", "General"),
+                "status": app_row.get("status"),
+                "appliedAt": app_row.get("applied_at")[:10] if app_row.get("applied_at") else ""
+            })
+
+        # Step 4: Map each application to a returned candidate object
         candidates = []
-        for cid, ap in seen_candidates.items():
-            # Get user data
-            user_res = supabase.table("users")\
-                .select("id, email, first_name, last_name, created_at")\
-                .eq("id", cid)\
-                .maybe_single().execute()
-            u = user_res.data if user_res else {}
+        for ap in applications:
+            app_id = ap["id"]
+            cid = ap["candidate_id"]
+            
+            # Retrieve batched details
+            u = users_by_id.get(cid)
             if not u:
                 continue
 
             full_name = f"{u.get('first_name', '')} {u.get('last_name', '')}".strip()
-            initials = "".join([p[0] for p in full_name.split() if p]).upper()[:2] or "?"
+            initials = "".join([part[0] for part in full_name.split() if part]).upper()[:2] or "?"
 
-            # Get latest analysis
-            analysis = supabase.table("cv_analysis")\
-                .select("cv_score, ats_score, job_category, experience_years, detected_skills, "
-                        "improvements, strengths, ai_note, analyzed_at, predicted_category, "
-                        "communication_score, cultural_fit_score, skill_score")\
-                .eq("user_id", cid)\
-                .order("analyzed_at", desc=True)\
-                .limit(1)\
-                .maybe_single().execute()
-            a = analysis.data if analysis else {}
-
-            # Get latest prediction
-            pred = supabase.table("recruitment_predictions")\
-                .select("hiring_chance, hiring_recommendation")\
-                .eq("user_id", cid)\
-                .order("predicted_at", desc=True)\
-                .limit(1)\
-                .maybe_single().execute()
-            p = pred.data if pred else {}
-
-            # Get candidate profile
-            profile = supabase.table("candidate_profiles")\
-                .select("location, desired_salary")\
-                .eq("user_id", cid)\
-                .maybe_single().execute()
-            pr = profile.data if profile else {}
-
-            # Get latest active CV (for signed URL)
-            cv_res = supabase.table("cvs")\
-                .select("file_path, file_name")\
-                .eq("user_id", cid)\
-                .eq("is_active", True)\
-                .order("uploaded_at", desc=True)\
-                .limit(1)\
-                .maybe_single().execute()
-            cv = cv_res.data if cv_res else {}
-
-            # Get detailed resume
-            res_res = supabase.table("candidate_resumes")\
-                .select("resume_json")\
-                .eq("user_id", cid)\
-                .maybe_single().execute()
-            res_data = res_res.data.get("resume_json") if (res_res and res_res.data and isinstance(res_res.data, dict)) else {}
+            a = analyses_by_id.get(cid) or {}
+            p = preds_by_id.get(cid) or {}
+            pr = profiles_by_id.get(cid) or {}
+            cv = cvs_by_id.get(cid) or {}
+            res_data = resumes_by_id.get(cid) or {}
 
             education = res_data.get("education") or []
             experiences = res_data.get("experiences") or []
             certifications = res_data.get("certifications") or []
 
-            # Get other jobs they applied to (scoped to their ID)
-            applied_jobs_res = supabase.table("applications")\
-                .select("status, applied_at, jobs(title, department)")\
-                .eq("candidate_id", cid)\
-                .execute()
-            applied_jobs = []
-            for app_row in (applied_jobs_res.data or []):
-                j = app_row.get("jobs") or {}
-                applied_jobs.append({
-                    "title": j.get("title", "Unknown Role"),
-                    "department": j.get("department", "General"),
-                    "status": app_row.get("status"),
-                    "appliedAt": app_row.get("applied_at")[:10] if app_row.get("applied_at") else ""
-                })
+            applied_jobs = apps_by_candidate.get(cid) or []
+            job_title = ap.get("jobs", {}).get("title") or "Position"
 
             candidates.append({
-                "id": cid,
+                "id": app_id,  # UNIQUE per application so different applications aren't grouped
                 "name": full_name,
                 "email": u.get("email"),
                 "avatar": initials,
                 "avatarBg": "bg-primary",
-                "role": a.get("predicted_category") or "Candidate",
+                "role": job_title,  # Set the role/subtitle to the applied job title
                 "cvScore": a.get("cv_score", 0),
                 "atsScore": a.get("ats_score", 0),
                 "communicationScore": a.get("communication_score", 0),
@@ -680,6 +701,8 @@ def get_candidates_for_recruiter(recruiter_id: str) -> list[dict]:
         return candidates
     except Exception as e:
         print(f"Error fetching candidates for recruiter: {e}")
+        import traceback as _tb
+        print(_tb.format_exc())
         return []
 
 
@@ -690,9 +713,9 @@ def get_candidate_cv_url(file_path: str) -> str | None:
     return get_signed_cv_url(file_path, expires_in=3600)
 
 
-def update_application_status(candidate_id: str, new_status: str, recruiter_id: str = None) -> bool:
+def update_application_status(candidate_id: str, new_status: str, recruiter_id: str = None, application_id: str = None) -> bool:
     """
-    Update the application status for a candidate.
+    Update the application status for a candidate or specific application.
     SECURITY FIX: When recruiter_id is provided, verifies the application is for one of the
     recruiter's own job postings before updating. Prevents cross-recruiter status manipulation.
     After a successful update, automatically creates an in-app notification for the candidate.
@@ -703,22 +726,28 @@ def update_application_status(candidate_id: str, new_status: str, recruiter_id: 
         if new_status not in valid_statuses:
             return False
 
-        # Build query for the most recent application for this candidate
-        query = supabase.table("applications")\
-            .select("id, job_id")\
-            .eq("candidate_id", candidate_id)\
-            .order("applied_at", desc=True)\
-            .limit(1)\
-            .maybe_single()
+        if application_id:
+            query = supabase.table("applications")\
+                .select("id, job_id, candidate_id")\
+                .eq("id", application_id)\
+                .maybe_single()
+        else:
+            query = supabase.table("applications")\
+                .select("id, job_id, candidate_id")\
+                .eq("candidate_id", candidate_id)\
+                .order("applied_at", desc=True)\
+                .limit(1)\
+                .maybe_single()
 
         app = query.execute()
 
         if not app or not app.data:
-            print(f"No application found for candidate {candidate_id}")
+            print(f"No application found for ID/candidate {application_id or candidate_id}")
             return False
 
         application_id = app.data["id"]
         job_id = app.data["job_id"]
+        candidate_id = app.data["candidate_id"]
 
         # SECURITY: If recruiter_id is provided, verify they own the job for this application
         if recruiter_id:
