@@ -6,6 +6,7 @@ import {
   Sparkles, AlertCircle
 } from "lucide-react";
 import { getAuthHeaders } from "./candidateContext";
+import { apiUrl } from "../../utils/apiConfig";
 
 const TYPE_CONFIG = {
   screening: {
@@ -44,7 +45,7 @@ export function NotificationsPage() {
   const fetchNotifs = async () => {
     try {
       const headers = getAuthHeaders();
-      const res = await fetch("/api/candidate/notifications", { headers });
+      const res = await fetch(apiUrl("/api/candidate/notifications"), { headers });
       if (!res.ok) throw new Error("Failed to fetch notifications");
       const data = await res.json();
       setNotifications(data.notifications || []);
@@ -71,7 +72,7 @@ export function NotificationsPage() {
 
     try {
       const headers = getAuthHeaders();
-      const res = await fetch("/api/candidate/notifications/read", {
+      const res = await fetch(apiUrl("/api/candidate/notifications/read"), {
         method: "POST",
         headers: {
           ...headers,
@@ -99,7 +100,7 @@ export function NotificationsPage() {
 
       try {
         const headers = getAuthHeaders();
-        const res = await fetch("/api/candidate/notifications/read", {
+        const res = await fetch(apiUrl("/api/candidate/notifications/read"), {
           method: "POST",
           headers: {
             ...headers,

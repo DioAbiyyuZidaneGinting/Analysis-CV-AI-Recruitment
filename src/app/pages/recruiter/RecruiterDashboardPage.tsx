@@ -5,6 +5,7 @@ import {
   Filter, Plus, Edit3, Trash2, XCircle, ChevronRight, Mail, MapPin, Award, Download, ThumbsUp, ThumbsDown, X
 } from "lucide-react";
 import { useNavigate } from "react-router";
+import { apiUrl } from "../../utils/apiConfig";
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem("access_token");
@@ -206,7 +207,7 @@ function CandidateDetailPanel({ candidate, onClose, onAction, showToast }: {
         <button 
           onClick={async () => {
             try {
-              const res = await fetch(`/api/recruiter/candidate/${candidate.id}/cv-url`, {
+              const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidate.id}/cv-url`), {
                 headers: getAuthHeaders()
               });
               const data = await res.json();
@@ -269,7 +270,7 @@ export function RecruiterDashboardPage() {
 
   const fetchCandidates = () => {
     setLoading(true);
-    fetch("/api/recruiter/candidates", { headers: getAuthHeaders() })
+    fetch(apiUrl("/api/recruiter/candidates"), { headers: getAuthHeaders() })
       .then(res => res.ok ? res.json() : { candidates: [] })
       .then(data => {
         setCandidates(data.candidates || []);
@@ -284,7 +285,7 @@ export function RecruiterDashboardPage() {
 
   const fetchJobs = () => {
     setFetchingJobs(true);
-    fetch("/api/recruiter/jobs", { headers: getAuthHeaders() })
+    fetch(apiUrl("/api/recruiter/jobs"), { headers: getAuthHeaders() })
       .then(res => res.ok ? res.json() : { jobs: [] })
       .then(data => {
         setJobs(data.jobs || []);
@@ -304,7 +305,7 @@ export function RecruiterDashboardPage() {
 
   const handleAction = async (candidateId: string, action: "accepted" | "rejected") => {
     try {
-      const res = await fetch(`/api/recruiter/candidate/${candidateId}/action`, {
+      const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidateId}/action`), {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ action })
@@ -388,7 +389,7 @@ export function RecruiterDashboardPage() {
     };
 
     try {
-      const url = editingJob ? `/api/recruiter/jobs/${editingJob.id}` : "/api/recruiter/jobs";
+      const url = editingJob ? apiUrl(`/api/recruiter/jobs/${editingJob.id}`) : apiUrl("/api/recruiter/jobs");
       const method = editingJob ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -417,7 +418,7 @@ export function RecruiterDashboardPage() {
       return;
     }
     try {
-      const res = await fetch(`/api/recruiter/jobs/${jobId}`, {
+      const res = await fetch(apiUrl(`/api/recruiter/jobs/${jobId}`), {
         method: "DELETE",
         headers: getAuthHeaders()
       });
@@ -435,7 +436,7 @@ export function RecruiterDashboardPage() {
 
   const handleToggleJobStatus = async (job: any, newStatus: string) => {
     try {
-      const res = await fetch(`/api/recruiter/jobs/${job.id}`, {
+      const res = await fetch(apiUrl(`/api/recruiter/jobs/${job.id}`), {
         method: "PUT",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ status: newStatus })

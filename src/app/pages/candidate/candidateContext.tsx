@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { motion, AnimatePresence } from "motion/react";
+import { apiUrl } from "../../utils/apiConfig";
 
 const DEFAULT_CANDIDATE = {
   name: "",
@@ -30,7 +31,7 @@ export async function getValidToken(): Promise<Record<string, string>> {
   if (needsRefresh && refreshToken) {
     try {
       console.log("JWT near-expiry — refreshing silently...");
-      const res = await fetch("/api/auth/refresh", {
+      const res = await fetch(apiUrl("/api/auth/refresh"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token: refreshToken }),
@@ -216,7 +217,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
     const headers = await getValidToken();
     if (!headers.Authorization) return;
     try {
-      const res = await fetch("/api/candidate/resume", { headers });
+      const res = await fetch(apiUrl("/api/candidate/resume"), { headers });
       if (res.ok) {
         const data = await res.json();
         if (data.resume) {
@@ -241,7 +242,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
   const fetchHistory = useCallback(async () => {
     const headers = await getValidToken();
     if (!headers.Authorization) return;
-    fetch("/api/candidate/history", { headers })
+    fetch(apiUrl("/api/candidate/history"), { headers })
       .then((res) => res.ok ? res.json() : { history: [] })
       .then((data) => setHistory(data.history || []))
       .catch(() => setHistory([]));
@@ -267,12 +268,12 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
         return;
       }
 
-      fetch("/api/candidate/profile", { headers })
+      fetch(apiUrl("/api/candidate/profile"), { headers })
         .then((res) => { if (res.ok) return res.json(); throw new Error(`Profile fetch failed: ${res.status}`); })
         .then((data) => { if (data.candidate) { setCandidate(data.candidate); if (data.candidate.cvAnalyzed) setAnalyzed(true); } })
         .catch((err) => console.warn("Profile not found in Supabase yet:", err));
 
-      fetch("/api/candidate/applications", { headers })
+      fetch(apiUrl("/api/candidate/applications"), { headers })
         .then((res) => res.ok ? res.json() : { applications: [] })
         .then((data) => setApplications(data.applications || []))
         .catch(() => setApplications([]));
@@ -301,7 +302,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
     formData.append("file", file);
 
     try {
-      const res = await fetch("/api/candidate/upload", {
+      const res = await fetch(apiUrl("/api/candidate/upload"), {
         method: "POST",
         headers,  // Authorization Bearer token only (no Content-Type for multipart)
         body: formData,
@@ -437,7 +438,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
 
   const handleImportFromCV = async () => {
     try {
-      const res = await fetch("/api/candidate/import-latest-cv", {
+      const res = await fetch(apiUrl("/api/candidate/import-latest-cv"), {
         headers: getAuthHeaders()
       });
       if (!res.ok) {
@@ -479,7 +480,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
     };
 
     try {
-      const res = await fetch("/api/candidate/resume", {
+      const res = await fetch(apiUrl("/api/candidate/resume"), {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({
@@ -502,7 +503,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
     e.preventDefault();
     setOptimizing(true);
     try {
-      const res = await fetch("/api/candidate/optimize-resume", {
+      const res = await fetch(apiUrl("/api/candidate/optimize-resume"), {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({
@@ -565,7 +566,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
 
     try {
       const authHeaders = await getValidToken();
-      const response = await fetch("/api/candidate/generate-pdf", {
+      const response = await fetch(apiUrl("/api/candidate/generate-pdf"), {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({
@@ -637,7 +638,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
 
     try {
       const authHeaders = await getValidToken();
-      const response = await fetch("/api/candidate/generate-docx", {
+      const response = await fetch(apiUrl("/api/candidate/generate-docx"), {
         method: "POST",
         headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({

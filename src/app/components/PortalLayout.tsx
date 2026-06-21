@@ -6,6 +6,7 @@ import {
   Users, LogOut, Bell, ChevronDown, Menu, X, History, Zap
 } from "lucide-react";
 import { signOut } from "../utils/auth";
+import { apiUrl } from "../utils/apiConfig";
 
 interface NavItem {
   icon: any;
@@ -128,7 +129,7 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
       const fetchNotifs = () => {
         const headers = getAuthHeaders();
         if (!headers.Authorization) return;
-        fetch("/api/recruiter/notifications", { headers })
+        fetch(apiUrl("/api/recruiter/notifications"), { headers })
           .then(res => res.ok ? res.json() : { notifications: [] })
           .then(data => {
             setNotifications(data.notifications || []);
@@ -146,7 +147,7 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
       const fetchCandidateNotifs = () => {
         const headers = getAuthHeaders();
         if (!headers.Authorization) return;
-        fetch("/api/candidate/notifications", { headers })
+        fetch(apiUrl("/api/candidate/notifications"), { headers })
           .then(res => res.ok ? res.json() : { notifications: [], unread_count: 0 })
           .then(data => {
             setCandidateNotifications(data.notifications || []);
@@ -324,7 +325,7 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
                                   if (!n.is_read) {
                                     try {
                                       const headers = getAuthHeaders();
-                                      await fetch(`/api/recruiter/notifications/${n.id}/read`, {
+                                      await fetch(apiUrl(`/api/recruiter/notifications/${n.id}/read`), {
                                         method: "POST",
                                         headers
                                       });
@@ -386,7 +387,7 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
                                   setCandidateUnreadCount(0);
                                   try {
                                     const headers = getAuthHeaders();
-                                    await fetch("/api/candidate/notifications/read", {
+                                    await fetch(apiUrl("/api/candidate/notifications/read"), {
                                       method: "POST",
                                       headers: {
                                         ...headers,
@@ -428,7 +429,7 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
                                         setCandidateUnreadCount(prev => Math.max(0, prev - 1));
                                         try {
                                           const headers = getAuthHeaders();
-                                          await fetch("/api/candidate/notifications/read", {
+                                          await fetch(apiUrl("/api/candidate/notifications/read"), {
                                             method: "POST",
                                             headers: {
                                               ...headers,

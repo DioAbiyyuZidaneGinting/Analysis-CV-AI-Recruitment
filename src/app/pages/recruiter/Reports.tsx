@@ -8,6 +8,7 @@ import {
   TrendingUp, Award, Download, BarChart3, Users,
   MessageSquare, Star, Heart, Sparkles, MousePointer, Palette
 } from "lucide-react";
+import { apiUrl } from "../../utils/apiConfig";
 
 /** Helper: get Authorization header from stored JWT token */
 function getAuthHeaders(): Record<string, string> {
@@ -77,7 +78,7 @@ export function ReportsPage() {
   const [loadingFeedback, setLoadingFeedback] = useState(true);
 
   useEffect(() => {
-    fetch("/api/recruiter/reports/stats", {
+    fetch(apiUrl("/api/recruiter/reports/stats"), {
       headers: getAuthHeaders()
     })
       .then(res => res.ok ? res.json() : null)
@@ -92,7 +93,7 @@ export function ReportsPage() {
         setLoading(false);
       });
 
-    fetch("/api/recruiter/feedback/analytics", {
+    fetch(apiUrl("/api/recruiter/feedback/analytics"), {
       headers: getAuthHeaders()
     })
       .then(res => res.ok ? res.json() : null)

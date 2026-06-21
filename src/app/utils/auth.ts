@@ -9,6 +9,7 @@
  */
 
 import { supabase } from "./supabaseClient";
+import { apiUrl } from "./apiConfig";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -99,7 +100,7 @@ export async function signInWithGithub(): Promise<void> {
  * Returns the AppUser record from our DB, or throws on error.
  */
 export async function syncOAuthUser(accessToken: string): Promise<AppUser> {
-  const res = await fetch("/api/auth/sync-oauth-user", {
+  const res = await fetch(apiUrl("/api/auth/sync-oauth-user"), {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

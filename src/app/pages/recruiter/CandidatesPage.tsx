@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import {
   Users, Brain, Star, Search, Filter, ChevronRight, XCircle, Mail, MapPin, Briefcase, Award, Download, ThumbsUp, ThumbsDown, AlertCircle, RefreshCw, X
 } from "lucide-react";
+import { apiUrl } from "../../utils/apiConfig";
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem("access_token");
@@ -199,7 +200,7 @@ function CandidateDetailPanel({ candidate, onClose, onAction }: {
         <button 
           onClick={async () => {
             try {
-              const res = await fetch(`/api/recruiter/candidate/${candidate.id}/cv-url`, {
+              const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidate.id}/cv-url`), {
                 headers: getAuthHeaders()
               });
               const data = await res.json();
@@ -232,7 +233,7 @@ export function CandidatesPage() {
   const fetchCandidates = () => {
     setLoading(true);
     setError(null);
-    fetch("/api/recruiter/candidates", { headers: getAuthHeaders() })
+    fetch(apiUrl("/api/recruiter/candidates"), { headers: getAuthHeaders() })
       .then(res => {
         if (!res.ok) {
           throw new Error("Failed to fetch candidates");
@@ -257,7 +258,7 @@ export function CandidatesPage() {
 
   const handleAction = async (candidateId: string, action: "accepted" | "rejected") => {
     try {
-      const res = await fetch(`/api/recruiter/candidate/${candidateId}/action`, {
+      const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidateId}/action`), {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ action })

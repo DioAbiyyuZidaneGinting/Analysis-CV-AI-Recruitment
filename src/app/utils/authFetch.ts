@@ -3,6 +3,7 @@
  * Handles token refresh automatically before API calls.
  */
 
+import { apiUrl } from "./apiConfig";
 /** Get current Authorization header with the stored JWT */
 export function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem("access_token");
@@ -18,7 +19,7 @@ export async function tryRefreshToken(): Promise<boolean> {
   if (!refreshToken) return false;
 
   try {
-    const res = await fetch("/api/auth/refresh", {
+    const res = await fetch(apiUrl("/api/auth/refresh"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ refresh_token: refreshToken }),

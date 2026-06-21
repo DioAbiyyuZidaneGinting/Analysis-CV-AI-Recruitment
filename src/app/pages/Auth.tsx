@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { signInWithGoogle, signInWithGithub } from "../utils/auth";
+import { apiUrl } from "../utils/apiConfig";
 
 type Role = "candidate" | "recruiter";
 
@@ -108,8 +109,8 @@ export function AuthPage() {
     try {
       const response = await fetch(
         isLogin
-          ? "/api/auth/login"
-          : "/api/auth/register",
+          ? apiUrl("/api/auth/login")
+          : apiUrl("/api/auth/register"),
         {
           method: "POST",
           headers: {

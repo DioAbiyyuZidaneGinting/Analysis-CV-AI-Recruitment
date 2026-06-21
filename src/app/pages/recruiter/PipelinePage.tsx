@@ -4,6 +4,7 @@ import {
   Users, Brain, Star, XCircle, Mail, MapPin, Briefcase, Award, Download,
   ThumbsUp, ThumbsDown, ArrowRight, CheckCircle2, ChevronRight, AlertCircle
 } from "lucide-react";
+import { apiUrl } from "../../utils/apiConfig";
 
 function getAuthHeaders(): Record<string, string> {
   const token = localStorage.getItem("access_token");
@@ -342,7 +343,7 @@ function CandidateDetailPanel({ candidate, onClose, onMove, loading, showToast }
           <button
             onClick={async () => {
               try {
-                const res = await fetch(`/api/recruiter/candidate/${candidate.id}/cv-url`, {
+                const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidate.id}/cv-url`), {
                   headers: getAuthHeaders()
                 });
                 const data = await res.json();
@@ -386,7 +387,7 @@ export function PipelinePage() {
 
   const fetchCandidates = () => {
     setLoading(true);
-    fetch("/api/recruiter/candidates", { headers: getAuthHeaders() })
+    fetch(apiUrl("/api/recruiter/candidates"), { headers: getAuthHeaders() })
       .then(res => res.ok ? res.json() : { candidates: [] })
       .then(data => {
         const normalized = normalizeCandidates(data.candidates || []);
@@ -417,7 +418,7 @@ export function PipelinePage() {
     }
 
     try {
-      const res = await fetch(`/api/recruiter/candidate/${candidateId}/action`, {
+      const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidateId}/action`), {
         method: "POST",
         headers: { "Content-Type": "application/json", ...getAuthHeaders() },
         body: JSON.stringify({ action: newStatus })

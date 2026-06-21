@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { Zap, MapPin, Briefcase, Calendar, Check, Award, Brain, Star } from "lucide-react";
+import { apiUrl } from "../../utils/apiConfig";
 
 /** Helper: get a valid (auto-refreshed) Authorization header from stored JWT token */
 async function getAuthHeaders(): Promise<Record<string, string>> {
@@ -13,7 +14,7 @@ async function getAuthHeaders(): Promise<Record<string, string>> {
 
   if (needsRefresh && refreshToken) {
     try {
-      const res = await fetch("/api/auth/refresh", {
+      const res = await fetch(apiUrl("/api/auth/refresh"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token: refreshToken }),
@@ -77,7 +78,7 @@ export function JobMatchesPage() {
   const fetchJobs = async () => {
     setLoading(true);
     const headers = await getAuthHeaders();
-    fetch("/api/candidate/jobs", { headers })
+    fetch(apiUrl("/api/candidate/jobs"), { headers })
       .then(res => res.ok ? res.json() : { jobs: [] })
       .then(data => {
         setJobs(data.jobs || []);
@@ -98,7 +99,7 @@ export function JobMatchesPage() {
     setApplyingId(jobId);
     try {
       const headers = await getAuthHeaders();
-      const res = await fetch(`/api/candidate/jobs/${jobId}/apply`, {
+      const res = await fetch(apiUrl(`/api/candidate/jobs/${jobId}/apply`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

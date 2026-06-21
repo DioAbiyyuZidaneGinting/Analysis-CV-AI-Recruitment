@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { Star, Target, Briefcase, Zap, Brain, AlertCircle, ChevronRight } from "lucide-react";
 import { useCandidateContext } from "./candidateContext";
 import { PIPELINE_STEPS, STATUS_CONFIG } from "./candidateShared";
+import { apiUrl } from "../../utils/apiConfig";
 
 export function DashboardPage() {
   const navigate = useNavigate();
@@ -14,7 +15,7 @@ export function DashboardPage() {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token) return;
-    fetch("/api/candidate/feedback/eligible", {
+    fetch(apiUrl("/api/candidate/feedback/eligible"), {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => r.ok ? r.json() : null)
