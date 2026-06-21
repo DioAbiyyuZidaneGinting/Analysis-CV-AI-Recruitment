@@ -319,22 +319,33 @@ def forgot_password():
             first_name = user_row.get("first_name") or "there"
             recipient_name = f"{first_name} {user_row.get('last_name', '')}".strip() or first_name
 
-            # Build the redirect URL that Supabase will forward the user to
+            # Build the redirect URL that Supabase will forward the user to after verification
             redirect_to = f"{APP_URL}/reset-password"
 
-            # Trigger Supabase's password reset flow — generates a secure link
-            reset_res = supabase_anon.auth.reset_password_email(
-                email,
-                options={"redirect_to": redirect_to}
-            )
-            print(f"[forgot-password] Supabase reset triggered for {email}. Result: {reset_res}")
+            # Generate the recovery/reset link via Supabase Auth Admin API.
+            # This avoids Supabase sending its own unbranded email, returning the link instead.
+            link_res = supabase.auth.admin.generate_link({
+                "email": email,
+                "type": "recovery",
+                "options": {
+                    "redirect_to": redirect_to
+                }
+            })
 
-            # Build the link the user will click in our email.
-            # Supabase will send its own email too; we override with Brevo for branding.
-            # We send Supabase's redirect URL so the user lands on our /reset-password page
-            # where they enter a new password (the hash fragment carries the token).
-            reset_url = f"{APP_URL}/reset-password"
-            send_password_reset_email(email, recipient_name, reset_url)
+            action_link = None
+            if hasattr(link_res, "properties") and hasattr(link_res.properties, "action_link"):
+                action_link = link_res.properties.action_link
+            elif isinstance(link_res, dict):
+                action_link = link_res.get("properties", {}).get("action_link") or link_res.get("action_link")
+
+            if not action_link:
+                print(f"[forgot-password] Failed to generate recovery link. Response: {link_res}")
+                raise RuntimeError("Failed to retrieve action link from Supabase.")
+
+            print(f"[forgot-password] Supabase reset link generated for {email}.")
+
+            # Send our custom branded email via Brevo containing the secure action link
+            send_password_reset_email(email, recipient_name, action_link)
         else:
             print(f"[forgot-password] Email not found: {email} (silent ignore)")
 
