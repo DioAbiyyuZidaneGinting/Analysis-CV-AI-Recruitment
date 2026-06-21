@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from flask import Flask, jsonify, send_from_directory, render_template
+from flask_cors import CORS
 
 load_dotenv()
 from routes.auth import auth_bp
@@ -12,6 +13,7 @@ app = Flask(
     static_folder="static",
     template_folder="templates"
 )
+CORS(app)
 
 # Register blueprints
 app.register_blueprint(auth_bp, url_prefix="/api/auth")
