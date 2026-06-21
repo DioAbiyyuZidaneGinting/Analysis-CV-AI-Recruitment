@@ -2,14 +2,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Users, Brain, Star, XCircle, Mail, MapPin, Briefcase, Award, Download,
-  ThumbsUp, ThumbsDown, ArrowRight, CheckCircle2, ChevronRight, AlertCircle
+  ThumbsUp, ThumbsDown, ArrowRight, CheckCircle2, ChevronRight, AlertCircle, RefreshCw
 } from "lucide-react";
 import { apiUrl } from "../../utils/apiConfig";
-
-function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem("access_token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+import { authFetch } from "../../utils/authFetch";
 
 // ─── Workflow definition ───────────────────────────────────────────────────────
 // Each stage maps to its allowed next transitions.
@@ -367,9 +363,7 @@ function CandidateDetailPanel({ candidate, onClose, onMove, loading, showToast }
           <button
             onClick={async () => {
               try {
-                const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidate.id}/cv-url`), {
-                  headers: getAuthHeaders()
-                });
+                const res = await authFetch(apiUrl(`/api/recruiter/candidate/${candidate.id}/cv-url`));
                 const data = await res.json();
                 if (res.ok && data.signedUrl) {
                   window.open(data.signedUrl, "_blank");
@@ -409,25 +403,24 @@ export function PipelinePage() {
       return { ...c, status };
     });
 
-  const fetchCandidates = () => {
+  const fetchCandidates = async () => {
     setLoading(true);
-    fetch(apiUrl("/api/recruiter/candidates"), { headers: getAuthHeaders() })
-      .then(res => res.ok ? res.json() : { candidates: [] })
-      .then(data => {
-        const normalized = normalizeCandidates(data.candidates || []);
-        setCandidates(normalized);
-        setSelectedCandidate(prev => {
-          if (!prev) return null;
-          const updated = normalized.find(c => c.id === prev.id);
-          return updated || prev;
-        });
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching pipeline candidates:", err);
-        setCandidates([]);
-        setLoading(false);
+    try {
+      const res = await authFetch(apiUrl("/api/recruiter/candidates"));
+      const data = res.ok ? await res.json() : { candidates: [] };
+      const normalized = normalizeCandidates(data.candidates || []);
+      setCandidates(normalized);
+      setSelectedCandidate(prev => {
+        if (!prev) return null;
+        const updated = normalized.find(c => c.id === prev.id);
+        return updated || prev;
       });
+    } catch (err) {
+      console.error("Error fetching pipeline candidates:", err);
+      setCandidates([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchCandidates(); }, []);
@@ -442,9 +435,9 @@ export function PipelinePage() {
     }
 
     try {
-      const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidateId}/action`), {
+      const res = await authFetch(apiUrl(`/api/recruiter/candidate/${candidateId}/action`), {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: newStatus })
       });
       if (!res.ok) {
@@ -520,9 +513,20 @@ export function PipelinePage() {
       </AnimatePresence>
 
       {/* Header */}
-      <div className="border-b border-black/[0.08] pb-4">
-        <h1 className="text-xl font-black text-foreground" style={{ fontFamily: 'var(--font-display)' }}>Recruitment Pipeline</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Structured workflow tracking candidate advancement from application to placement</p>
+      <div className="border-b border-black/[0.08] pb-4 flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-black text-foreground" style={{ fontFamily: 'var(--font-display)' }}>Recruitment Pipeline</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Structured workflow tracking candidate advancement from application to placement</p>
+        </div>
+        <button
+          onClick={fetchCandidates}
+          disabled={loading}
+          title="Refresh pipeline"
+          className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:bg-black/[0.02] px-3 py-2 rounded-lg text-xs font-bold text-muted-foreground hover:text-foreground transition-all shadow-sm disabled:opacity-50"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
       </div>
 
       {/* Workflow guide */}

@@ -4,11 +4,7 @@ import {
   Users, Brain, Star, Search, Filter, ChevronRight, XCircle, Mail, MapPin, Briefcase, Award, Download, ThumbsUp, ThumbsDown, AlertCircle, RefreshCw, X
 } from "lucide-react";
 import { apiUrl } from "../../utils/apiConfig";
-
-function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem("access_token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+import { authFetch, getAuthHeaders } from "../../utils/authFetch";
 
 function ScoreBadge({ score }: { score: number }) {
   const color = score >= 90 ? "bg-[#b8f2e6] text-emerald-700" : score >= 75 ? "bg-[#e9d5ff] text-primary" : "bg-[#ffd6a5] text-orange-700";
@@ -228,9 +224,7 @@ function CandidateDetailPanel({ candidate, onClose, onAction }: {
         <button 
           onClick={async () => {
             try {
-              const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidate.id}/cv-url`), {
-                headers: getAuthHeaders()
-              });
+              const res = await authFetch(apiUrl(`/api/recruiter/candidate/${candidate.id}/cv-url`));
               const data = await res.json();
               if (res.ok && data.signedUrl) {
                 window.open(data.signedUrl, "_blank");
@@ -258,26 +252,21 @@ export function CandidatesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
 
-  const fetchCandidates = () => {
+  const fetchCandidates = async () => {
     setLoading(true);
     setError(null);
-    fetch(apiUrl("/api/recruiter/candidates"), { headers: getAuthHeaders() })
-      .then(res => {
-        if (!res.ok) {
-          throw new Error("Failed to fetch candidates");
-        }
-        return res.json();
-      })
-      .then(data => {
-        setCandidates(data.candidates || []);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Error fetching candidates pool:", err);
-        setError(err.message || "Error fetching candidates");
-        setCandidates([]);
-        setLoading(false);
-      });
+    try {
+      const res = await authFetch(apiUrl("/api/recruiter/candidates"));
+      if (!res.ok) throw new Error("Failed to fetch candidates");
+      const data = await res.json();
+      setCandidates(data.candidates || []);
+    } catch (err: any) {
+      console.error("Error fetching candidates pool:", err);
+      setError(err.message || "Error fetching candidates");
+      setCandidates([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -286,9 +275,9 @@ export function CandidatesPage() {
 
   const handleAction = async (candidateId: string, action: "accepted" | "rejected") => {
     try {
-      const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidateId}/action`), {
+      const res = await authFetch(apiUrl(`/api/recruiter/candidate/${candidateId}/action`), {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action })
       });
       if (res.ok) {
@@ -332,9 +321,20 @@ export function CandidatesPage() {
         )}
       </AnimatePresence>
 
-      <div className="border-b border-black/[0.08] pb-4">
-        <h1 className="text-xl font-black text-foreground" style={{ fontFamily: 'var(--font-display)' }}>Candidates Pool</h1>
-        <p className="text-xs text-muted-foreground mt-0.5">Review all active applicants matching your job listings, ranked by AI matching score</p>
+      <div className="border-b border-black/[0.08] pb-4 flex items-start justify-between">
+        <div>
+          <h1 className="text-xl font-black text-foreground" style={{ fontFamily: 'var(--font-display)' }}>Candidates Pool</h1>
+          <p className="text-xs text-muted-foreground mt-0.5">Review all active applicants matching your job listings, ranked by AI matching score</p>
+        </div>
+        <button
+          onClick={fetchCandidates}
+          disabled={loading}
+          title="Refresh candidates list"
+          className="flex items-center gap-1.5 bg-white border border-black/[0.08] hover:bg-black/[0.02] px-3 py-2 rounded-lg text-xs font-bold text-muted-foreground hover:text-foreground transition-all shadow-sm disabled:opacity-50"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          Refresh
+        </button>
       </div>
 
       {/* Search Bar */}

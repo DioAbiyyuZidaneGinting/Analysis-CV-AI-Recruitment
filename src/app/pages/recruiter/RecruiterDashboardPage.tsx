@@ -6,11 +6,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router";
 import { apiUrl } from "../../utils/apiConfig";
-
-function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem("access_token");
-  return token ? { Authorization: `Bearer ${token}` } : {};
-}
+import { authFetch, getAuthHeaders } from "../../utils/authFetch";
 
 function ScoreBadge({ score }: { score: number }) {
   const color = score >= 90
@@ -296,34 +292,32 @@ export function RecruiterDashboardPage() {
   const [jobStatus, setJobStatus] = useState("open");
   const [jobDeadline, setJobDeadline] = useState("");
 
-  const fetchCandidates = () => {
+  const fetchCandidates = async () => {
     setLoading(true);
-    fetch(apiUrl("/api/recruiter/candidates"), { headers: getAuthHeaders() })
-      .then(res => res.ok ? res.json() : { candidates: [] })
-      .then(data => {
-        setCandidates(data.candidates || []);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error("Recruiter candidates fetch failed", err);
-        setCandidates([]);
-        setLoading(false);
-      });
+    try {
+      const res = await authFetch(apiUrl("/api/recruiter/candidates"));
+      const data = res.ok ? await res.json() : { candidates: [] };
+      setCandidates(data.candidates || []);
+    } catch (err) {
+      console.error("Recruiter candidates fetch failed", err);
+      setCandidates([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const fetchJobs = () => {
+  const fetchJobs = async () => {
     setFetchingJobs(true);
-    fetch(apiUrl("/api/recruiter/jobs"), { headers: getAuthHeaders() })
-      .then(res => res.ok ? res.json() : { jobs: [] })
-      .then(data => {
-        setJobs(data.jobs || []);
-        setFetchingJobs(false);
-      })
-      .catch(err => {
-        console.error("Error fetching jobs", err);
-        setJobs([]);
-        setFetchingJobs(false);
-      });
+    try {
+      const res = await authFetch(apiUrl("/api/recruiter/jobs"));
+      const data = res.ok ? await res.json() : { jobs: [] };
+      setJobs(data.jobs || []);
+    } catch (err) {
+      console.error("Error fetching jobs", err);
+      setJobs([]);
+    } finally {
+      setFetchingJobs(false);
+    }
   };
 
   useEffect(() => {
@@ -333,9 +327,9 @@ export function RecruiterDashboardPage() {
 
   const handleAction = async (candidateId: string, action: "accepted" | "rejected") => {
     try {
-      const res = await fetch(apiUrl(`/api/recruiter/candidate/${candidateId}/action`), {
+      const res = await authFetch(apiUrl(`/api/recruiter/candidate/${candidateId}/action`), {
         method: "POST",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action })
       });
       if (res.ok) {
@@ -420,9 +414,9 @@ export function RecruiterDashboardPage() {
       const url = editingJob ? apiUrl(`/api/recruiter/jobs/${editingJob.id}`) : apiUrl("/api/recruiter/jobs");
       const method = editingJob ? "PUT" : "POST";
 
-      const res = await fetch(url, {
+      const res = await authFetch(url, {
         method,
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
@@ -446,9 +440,8 @@ export function RecruiterDashboardPage() {
       return;
     }
     try {
-      const res = await fetch(apiUrl(`/api/recruiter/jobs/${jobId}`), {
+      const res = await authFetch(apiUrl(`/api/recruiter/jobs/${jobId}`), {
         method: "DELETE",
-        headers: getAuthHeaders()
       });
       if (res.ok) {
         showToast("Job deleted successfully!", "success");
@@ -464,9 +457,9 @@ export function RecruiterDashboardPage() {
 
   const handleToggleJobStatus = async (job: any, newStatus: string) => {
     try {
-      const res = await fetch(apiUrl(`/api/recruiter/jobs/${job.id}`), {
+      const res = await authFetch(apiUrl(`/api/recruiter/jobs/${job.id}`), {
         method: "PUT",
-        headers: { "Content-Type": "application/json", ...getAuthHeaders() },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus })
       });
       if (res.ok) {
