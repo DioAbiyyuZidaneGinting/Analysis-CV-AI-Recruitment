@@ -120,6 +120,32 @@ def register_user(email: str, password: str, role: str, first_name: str, last_na
         print("SUPABASE RESPONSE:", response)
         if response.user:
             session = getattr(response, "session", None)
+
+            # Always ensure the user exists in public.users regardless of whether
+            # the handle_new_user trigger fired — this is the critical fix so that
+            # new accounts pass the require_auth role check immediately after register.
+            try:
+                existing = supabase.table("users").select("id").eq("id", response.user.id).maybe_single().execute()
+                if not existing.data:
+                    supabase.table("users").insert({
+                        "id": response.user.id,
+                        "email": email,
+                        "role": role,
+                        "first_name": first_name,
+                        "last_name": last_name
+                    }).execute()
+                    print(f"[REGISTER] Manually inserted user {response.user.id} into public.users")
+                else:
+                    # Trigger fired — but make sure role/name are correct
+                    supabase.table("users").update({
+                        "role": role,
+                        "first_name": first_name,
+                        "last_name": last_name
+                    }).eq("id", response.user.id).execute()
+                    print(f"[REGISTER] User {response.user.id} already in public.users — updated role/name")
+            except Exception as insert_err:
+                print(f"[REGISTER] Warning: failed to ensure user in public.users: {insert_err}")
+
             return {
                 "success": True,
                 "access_token": session.access_token if session else None,
