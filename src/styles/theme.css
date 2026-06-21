@@ -128,3 +128,107 @@
   --radius-lg: calc(var(--radius) + 4px);
   --radius-xl: calc(var(--radius) + 12px);
 }
+
+/* Aura Glass Design System Utilities */
+.bg-aura-grid {
+  background-color: #F9F9F7;
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+  background-size: 50px 50px, 50px 50px;
+  position: relative;
+}
+
+.bg-aura-grid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(0, 82, 204, 0.025), transparent 80%);
+  pointer-events: none;
+}
+
+.spotlight-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(600px circle at var(--x, 50%) var(--y, 50%),
+      rgba(0, 88, 190, 0.07),
+      transparent 40%);
+  transition: background 0.3s ease;
+}
+
+.aura-glass-card {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.02),
+    0 0 40px rgba(0, 82, 204, 0.01);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.aura-glass-card:hover {
+  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.04),
+    0 0 40px rgba(0, 82, 204, 0.03);
+}
+
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #000000;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    background 0.3s;
+  will-change: transform, width, height, left, top;
+}
+
+.cursor-hover {
+  width: 60px;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(2px);
+}
+
+.aura-btn-primary {
+  background: #0052CC;
+  color: #ffffff;
+  box-shadow: 0 0 20px rgba(0, 82, 204, 0.15);
+  transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+
+.aura-btn-primary:hover {
+  opacity: 0.95;
+  box-shadow: 0 0 25px rgba(0, 82, 204, 0.3);
+}
+
+.aura-btn-ghost {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.02);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  color: #000000;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+
+.aura-btn-ghost:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+/* Hide default cursor globally when custom cursor is active */
+.custom-cursor-active,
+.custom-cursor-active * {
+  cursor: none !important;
+}

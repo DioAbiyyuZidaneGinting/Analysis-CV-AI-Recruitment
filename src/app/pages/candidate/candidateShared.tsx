@@ -54,11 +54,11 @@ export function CVUploadArea({
       }}
       onDragLeave={() => setIsDragging(false)}
       onDrop={handleDrop}
-      className={`relative border-2 border-dashed rounded-2xl p-8 text-center transition-all cursor-pointer ${
+      className={`relative border border-dashed rounded-xl p-8 text-center transition-all cursor-pointer ${
         isDragging
-          ? "border-primary bg-[#f0f0ff] scale-[1.01]"
-          : "border-black/20 hover:border-primary/50 hover:bg-muted/50"
-      } ${uploaded ? "border-primary bg-[#f0f0ff]" : ""}`}
+          ? "border-[#0052CC] bg-[#0052CC]/[0.02] scale-[1.01]"
+          : "border-black/15 hover:border-black/40 hover:bg-black/[0.01]"
+      } ${uploaded ? "border-[#0052CC]/20 bg-[#F9F9F7]" : ""}`}
       onClick={() => fileInputRef.current?.click()}
     >
       <input
@@ -72,17 +72,18 @@ export function CVUploadArea({
         {uploaded ? (
           <motion.div
             key="uploaded"
-            initial={{ opacity: 0, scale: 0.8 }}
+            initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center"
           >
-            <div className="w-14 h-14 bg-[#b8f2e6] rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <CheckCircle className="w-7 h-7 text-emerald-600" />
+            <div className="w-12 h-12 border border-black/10 bg-white rounded-lg flex items-center justify-center mb-3 shadow-sm">
+              <CheckCircle className="w-6 h-6 text-black" />
             </div>
-            <p className="font-bold text-foreground">
+            <p className="font-bold text-black font-mono text-sm">
               {fileName || "Sarah_Johnson_CV.pdf"}
             </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Ready to analyze
+            <p className="text-xs text-black/50 font-mono mt-1">
+              // ATTACHMENT_STATUS: READY_FOR_ANALYSIS
             </p>
           </motion.div>
         ) : (
@@ -90,17 +91,18 @@ export function CVUploadArea({
             key="empty"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
+            className="flex flex-col items-center"
           >
             <div
-              className={`w-14 h-14 ${isDragging ? "bg-primary" : "bg-[#e9d5ff]"} rounded-2xl flex items-center justify-center mx-auto mb-4 transition-colors`}
+              className={`w-12 h-12 border border-black/10 rounded-lg flex items-center justify-center mb-4 transition-colors bg-[#F9F9F7] shadow-sm`}
             >
               <Upload
-                className={`w-7 h-7 ${isDragging ? "text-white" : "text-primary"}`}
+                className="w-5 h-5 text-black"
               />
             </div>
-            <p className="font-bold text-foreground mb-1">Drop your CV here</p>
-            <p className="text-sm text-muted-foreground">
-              or click to browse • PDF, Word, or plain text
+            <p className="font-bold text-black tracking-tight mb-1">Upload your curriculum vitae</p>
+            <p className="text-xs text-black/50">
+              Drag & drop or click to upload (PDF, DOCX, TXT max 5MB)
             </p>
           </motion.div>
         )}
@@ -123,7 +125,7 @@ export function ScoreRing({
   const r = (size - strokeWidth * 2) / 2;
   const circumference = 2 * Math.PI * r;
   const offset = circumference * (1 - score / 100);
-  const color = score >= 80 ? "#6366f1" : score >= 60 ? "#ffb86c" : "#ef4444";
+  const color = score >= 80 ? "#0052CC" : score >= 60 ? "#ff8f00" : "#b71c1c";
 
   return (
     <div className="relative inline-flex items-center justify-center">
@@ -171,27 +173,27 @@ export function ScoreRing({
 export const STATUS_CONFIG = {
   submitted: {
     label: "Submitted",
-    color: "bg-[#bae6fd] text-sky-700",
+    color: "bg-[#0052CC]/5 text-[#0052CC] border border-[#0052CC]/15 shadow-sm",
     icon: Clock,
   },
   screening: {
     label: "Screening",
-    color: "bg-[#ffd6a5] text-orange-700",
+    color: "bg-[#ff8f00]/5 text-[#ff8f00] border border-[#ff8f00]/15 shadow-sm",
     icon: Eye,
   },
   interview: {
     label: "Interview",
-    color: "bg-[#e9d5ff] text-violet-700",
+    color: "bg-[#6200ee]/5 text-[#6200ee] border border-[#6200ee]/15 shadow-sm",
     icon: MessageSquare,
   },
   accepted: {
     label: "Accepted",
-    color: "bg-[#b8f2e6] text-emerald-700",
+    color: "bg-[#1b5e20]/5 text-[#1b5e20] border border-[#1b5e20]/15 shadow-sm",
     icon: CheckCircle,
   },
   rejected: {
     label: "Rejected",
-    color: "bg-[#fecdd3] text-red-600",
+    color: "bg-[#b71c1c]/5 text-[#b71c1c] border border-[#b71c1c]/15 shadow-sm",
     icon: XCircle,
   },
 };

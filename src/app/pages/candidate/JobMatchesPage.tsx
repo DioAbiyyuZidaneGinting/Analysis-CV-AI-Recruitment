@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { Zap, MapPin, Briefcase, Calendar, Check, Award, Brain, Star } from "lucide-react";
 
 /** Helper: get a valid (auto-refreshed) Authorization header from stored JWT token */
@@ -65,6 +65,15 @@ export function JobMatchesPage() {
   const [loading, setLoading] = useState(true);
   const [applyingId, setApplyingId] = useState<string | null>(null);
 
+  // Custom Toast State
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const showToast = (message: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  };
+
   const fetchJobs = async () => {
     setLoading(true);
     const headers = await getAuthHeaders();
@@ -98,17 +107,17 @@ export function JobMatchesPage() {
       });
       const data = await res.json();
       if (res.ok) {
-        alert("Application submitted successfully!");
+        showToast("Application submitted successfully!", "success");
         // Update local status immediately
         setJobs(prev => prev.map(job =>
           job.id === jobId ? { ...job, applied: true } : job
         ));
       } else {
-        alert(data.error || "Failed to submit application");
+        showToast(data.error || "Failed to submit application", "error");
       }
     } catch (err) {
       console.error(err);
-      alert("Error submitting application");
+      showToast("Error submitting application", "error");
     } finally {
       setApplyingId(null);
     }
@@ -129,15 +138,15 @@ export function JobMatchesPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-black text-foreground" style={{ fontFamily: "var(--font-display)" }}>Matched Job Listings</h1>
-        <p className="text-muted-foreground mt-1">AI-analyzed positions matching your CV qualification profile</p>
+        <p className="text-muted-foreground mt-1">AI analyzed positions matching your CV qualification profile</p>
       </div>
 
       {/* Info notice */}
-      <div className="bg-[#f0f0ff] border border-primary/20 rounded-2xl p-4 flex items-start gap-3">
-        <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+      <div className="bg-black/[0.01] border border-black/[0.08] rounded-xl p-4 flex items-start gap-3">
+        <Zap className="w-5 h-5 text-[#0052CC] mt-0.5 flex-shrink-0" />
         <div className="text-sm">
-          <p className="font-bold text-primary">Dynamic Score System</p>
-          <p className="text-muted-foreground mt-0.5">
+          <p className="font-bold text-foreground text-sm">Dynamic Score System</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
             Your match score increases automatically when you update your resume or upload a new CV. Applied jobs lock your score at application time.
           </p>
         </div>
@@ -151,15 +160,19 @@ export function JobMatchesPage() {
           {jobs.map((job, idx) => {
             const scores = job.matchScores;
             const overall = scores.overallMatch;
-            const badgeColor = overall >= 85 ? "bg-emerald-500/10 text-emerald-600" : overall >= 70 ? "bg-primary/10 text-primary" : "bg-orange-500/10 text-orange-600";
-            
+            const badgeColor = overall >= 85
+              ? "bg-emerald-500/[0.08] text-emerald-700 border-emerald-500/15"
+              : overall >= 70
+                ? "bg-[#0052CC]/[0.08] text-[#0052CC] border-[#0052CC]/15"
+                : "bg-amber-500/[0.08] text-amber-700 border-amber-500/15";
+
             return (
               <motion.div
                 key={job.id}
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.05 }}
-                className="bg-white rounded-3xl p-6 border border-black/[0.06] hover:shadow-lg transition-all flex flex-col justify-between"
+                className="bg-white rounded-xl p-5 border border-black/[0.08] hover:border-black/20 transition-all flex flex-col justify-between"
               >
                 <div>
                   {/* Top Badge & Match score */}
@@ -168,9 +181,9 @@ export function JobMatchesPage() {
                       <h2 className="font-black text-base text-foreground leading-tight">{job.title}</h2>
                       <p className="text-xs text-muted-foreground">{job.department}</p>
                     </div>
-                    <div className={`flex flex-col items-center p-2.5 rounded-2xl ${badgeColor} text-center min-w-[70px] border border-black/[0.03]`}>
-                      <span className="text-xl font-black leading-none">{overall}%</span>
-                      <span className="text-[9px] font-black uppercase mt-1 tracking-wide">Match</span>
+                    <div className={`flex flex-col items-center p-2 rounded-lg ${badgeColor} text-center min-w-[72px] border`}>
+                      <span className="text-lg font-black leading-none">{overall}%</span>
+                      <span className="text-[9px] font-bold uppercase mt-1 tracking-wide">Match</span>
                     </div>
                   </div>
 
@@ -185,20 +198,20 @@ export function JobMatchesPage() {
 
                   {/* Skills required */}
                   <div className="mb-4">
-                    <p className="text-[10px] uppercase font-bold text-foreground mb-1.5 tracking-wide">Required Skills</p>
+                    <p className="text-[10px] uppercase font-bold text-foreground mb-1.5 tracking-wide">REQUIRED SKILLS</p>
                     <div className="flex flex-wrap gap-1.5">
                       {job.required_skills.slice(0, 4).map(s => (
-                        <span key={s} className="bg-muted text-foreground text-[10px] font-semibold px-2.5 py-1 rounded-full">{s}</span>
+                        <span key={s} className="bg-black/[0.03] border border-black/[0.06] text-black text-[10px] font-mono font-bold px-2 py-0.5 rounded">{s}</span>
                       ))}
                       {job.required_skills.length > 4 && (
-                        <span className="bg-muted text-muted-foreground text-[10px] font-semibold px-2 py-1 rounded-full">+{job.required_skills.length - 4} more</span>
+                        <span className="bg-black/[0.03] border border-black/[0.06] text-muted-foreground text-[10px] font-mono font-bold px-2 py-0.5 rounded">+{job.required_skills.length - 4} more</span>
                       )}
                     </div>
                   </div>
 
                   {/* Score analysis breakdowns */}
-                  <div className="bg-[#f8f8fc] rounded-2xl p-4 mb-4 border border-black/[0.02]">
-                    <h4 className="flex items-center gap-1 text-[10px] font-black text-foreground uppercase tracking-wide mb-3"><Brain className="w-3.5 h-3.5 text-primary" /> AI Match Breakdown</h4>
+                  <div className="bg-black/[0.01] rounded-lg p-4 mb-4 border border-black/[0.06]">
+                    <h4 className="flex items-center gap-1 text-[10px] font-black text-foreground uppercase tracking-wide mb-3"><Brain className="w-3.5 h-3.5 text-[#0052CC]" /> AI Match Breakdown</h4>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
                       {[
                         { label: "CV Score", value: scores.cvScore, max: 100 },
@@ -211,8 +224,8 @@ export function JobMatchesPage() {
                             <span className="text-muted-foreground">{bar.label}</span>
                             <span className="text-foreground">{bar.value}%</span>
                           </div>
-                          <div className="h-1 bg-muted rounded-full overflow-hidden">
-                            <div className="h-full bg-primary rounded-full" style={{ width: `${bar.value}%` }} />
+                          <div className="h-1 bg-black/[0.06] rounded-full overflow-hidden">
+                            <div className="h-full bg-[#0052CC] rounded-full" style={{ width: `${bar.value}%` }} />
                           </div>
                         </div>
                       ))}
@@ -232,7 +245,7 @@ export function JobMatchesPage() {
                   {job.applied ? (
                     <button
                       disabled
-                      className="w-full flex items-center justify-center gap-2 bg-emerald-100 text-emerald-800 py-3 rounded-xl font-bold text-sm cursor-not-allowed border border-emerald-200"
+                      className="w-full flex items-center justify-center gap-2 bg-emerald-50 text-emerald-850 py-3 rounded-lg font-bold text-sm cursor-not-allowed border border-emerald-200/60 font-mono uppercase tracking-wider"
                     >
                       <Check className="w-4 h-4" /> Applied
                     </button>
@@ -240,7 +253,7 @@ export function JobMatchesPage() {
                     <button
                       onClick={() => handleApply(job.id)}
                       disabled={applyingId === job.id}
-                      className="w-full bg-secondary text-white py-3 rounded-xl font-bold text-sm hover:bg-secondary/90 transition-all hover:shadow-md disabled:opacity-50 flex items-center justify-center gap-2"
+                      className="w-full bg-[#0052CC] hover:bg-[#0052CC]/95 text-white py-3 rounded-lg font-bold text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2 font-mono uppercase tracking-wider shadow-sm"
                     >
                       {applyingId === job.id ? (
                         <>
@@ -257,12 +270,33 @@ export function JobMatchesPage() {
           })}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-24 border-2 border-dashed border-black/[0.06] rounded-3xl text-muted-foreground bg-white">
+        <div className="flex flex-col items-center justify-center py-24 border border-dashed border-black/[0.08] rounded-xl text-muted-foreground bg-white p-5">
           <Zap className="w-8 h-8 text-muted-foreground/50 mb-3" />
-          <p className="font-bold text-sm">No job matches currently found</p>
+          <p className="font-bold text-sm text-foreground">No job matches currently found</p>
           <p className="text-xs text-muted-foreground/80 mt-0.5">We couldn't find matches. Try building/enhancing your resume first!</p>
         </div>
       )}
+
+      {/* Custom Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3 bg-black text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-white/10"
+          >
+            <div className={`w-2 h-2 rounded-full ${toast.type === "success" ? "bg-emerald-500 animate-pulse" :
+              toast.type === "error" ? "bg-rose-500 animate-pulse" :
+                "bg-blue-500 animate-pulse"
+              }`} />
+            <span className="text-[12px] font-medium tracking-tight font-sans text-white/90">{toast.message}</span>
+            <button onClick={() => setToast(null)} className="ml-3 text-white/40 hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-[16px] block">close</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

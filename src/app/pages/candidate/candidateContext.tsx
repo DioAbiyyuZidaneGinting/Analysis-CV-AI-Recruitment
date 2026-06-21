@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import { motion, AnimatePresence } from "motion/react";
 
 const DEFAULT_CANDIDATE = {
   name: "",
@@ -139,6 +140,9 @@ interface CandidateContextValue {
   addCertification: () => void;
   removeCertification: (index: number) => void;
   updateCertification: (index: number, key: string, val: string) => void;
+
+  // Custom Toast Notifier
+  showToast: (message: string, type?: "success" | "error" | "info") => void;
 }
 
 const CandidateContext = createContext<CandidateContextValue | null>(null);
@@ -159,6 +163,15 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
   const [errorMsg, setErrorMsg] = useState("");
   const [applications, setApplications] = useState<any[]>([]);
   const [history, setHistory] = useState<any[]>([]);
+
+  // Custom Toast State
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "info" } | null>(null);
+  const showToast = useCallback((message: string, type: "success" | "error" | "info" = "success") => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 4000);
+  }, []);
 
   // AI Harvard Resume Builder form state
   const [rbName, setRbName] = useState("");
@@ -429,7 +442,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
       });
       if (!res.ok) {
         const errData = await res.json();
-        alert(errData.error || "Failed to import from CV");
+        showToast(errData.error || "Failed to import from CV", "error");
         return;
       }
       const r = await res.json();
@@ -443,11 +456,11 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
         if (r.skills) setRbSkillsObj(prev => ({ ...prev, ...r.skills }));
         if (r.certifications) setRbCertificationsList(r.certifications);
         if (r.interests) setRbInterestsStr(r.interests);
-        alert("Successfully imported details from your latest CV! You can now review and adjust them.");
+        showToast("Successfully imported details from your latest CV!", "success");
       }
     } catch (err) {
       console.error(err);
-      alert("Failed to import from CV due to network error.");
+      showToast("Failed to import from CV due to network error.", "error");
     }
   };
 
@@ -475,13 +488,13 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
         })
       });
       if (res.ok) {
-        alert("Draft saved successfully!");
+        showToast("Draft saved successfully!", "success");
       } else {
-        alert("Failed to save draft");
+        showToast("Failed to save draft", "error");
       }
     } catch (err) {
       console.error(err);
-      alert("Error saving draft");
+      showToast("Error saving draft", "error");
     }
   };
 
@@ -521,17 +534,14 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
         if (opt.skills) setRbSkillsObj((prev: any) => ({ ...prev, ...opt.skills }));
         if (opt.certifications) setRbCertificationsList(opt.certifications);
         if (opt.interests !== undefined) setRbInterestsStr(opt.interests);
-        const addedMsg = opt.addedKeywords?.length
-          ? `\n\nAdded ATS keywords to skills: ${opt.addedKeywords.join(", ")}`
-          : "";
-        alert(`Resume enhanced successfully! Action verbs strengthened and experiences re-ordered by relevance.${addedMsg}`);
+        showToast("Resume enhanced successfully! Action verbs strengthened.", "success");
       } else {
-        alert(data.error || "Optimization failed");
+        showToast(data.error || "Optimization failed", "error");
       }
     } catch (err) {
       console.error(err);
       setOptimizing(false);
-      alert("Error calling optimize API");
+      showToast("Error calling optimize API", "error");
     }
   };
 
@@ -573,7 +583,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
 
         if (!json.pdf_base64 || json.size === 0) {
           console.error("Error: Server returned empty PDF data.");
-          alert("Error: Generated PDF is empty. Please check server logs.");
+          showToast("Error: Generated PDF is empty.", "error");
           return;
         }
 
@@ -601,11 +611,11 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
       } else {
         const errorText = await response.text();
         console.error("Failed to generate PDF:", response.status, errorText);
-        alert(`Failed to generate PDF (${response.status}): ${errorText || response.statusText}`);
+        showToast("Failed to generate PDF.", "error");
       }
     } catch (err) {
       console.error("Error calling PDF downloader endpoint:", err);
-      alert("Error calling PDF downloader endpoint. Please check console logs.");
+      showToast("Error calling PDF downloader.", "error");
     }
   };
 
@@ -646,7 +656,7 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
 
         if (!json.docx_base64 || json.size === 0) {
           console.error("Error: Server returned empty DOCX data.");
-          alert("Error: Generated Word document is empty. Please check server logs.");
+          showToast("Error: Generated Word document is empty.", "error");
           return;
         }
 
@@ -676,11 +686,11 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
       } else {
         const errorText = await response.text();
         console.error("Failed to generate Word document:", errorText);
-        alert(`Failed to generate Word document: ${errorText || response.statusText}`);
+        showToast("Failed to generate Word document.", "error");
       }
     } catch (err) {
       console.error("Error calling Word downloader endpoint:", err);
-      alert("Error calling Word downloader endpoint. Please check console logs.");
+      showToast("Error calling Word downloader.", "error");
     }
   };
 
@@ -722,9 +732,32 @@ export function CandidateProvider({ children, onNavigateToCV }: { children: Reac
         addProject, removeProject, updateProject,
         addLeadership, removeLeadership, updateLeadership,
         addCertification, removeCertification, updateCertification,
+        showToast,
       }}
     >
       {children}
+
+      {/* Custom Global Candidate Toast Notification */}
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 15, scale: 0.95 }}
+            className="fixed bottom-6 right-6 z-[9999] flex items-center gap-3 bg-black text-white px-5 py-3.5 rounded-2xl shadow-2xl border border-white/10"
+          >
+            <div className={`w-2 h-2 rounded-full ${
+              toast.type === "success" ? "bg-emerald-500 animate-pulse" :
+              toast.type === "error" ? "bg-rose-500 animate-pulse" :
+              "bg-blue-500 animate-pulse"
+            }`} />
+            <span className="text-[12px] font-medium tracking-tight font-sans text-white/90">{toast.message}</span>
+            <button onClick={() => setToast(null)} className="ml-3 text-white/40 hover:text-white transition-colors">
+              <span className="material-symbols-outlined text-[16px] block">close</span>
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </CandidateContext.Provider>
   );
 }

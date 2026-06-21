@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { ReactNode, useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -57,6 +57,65 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
   const [showCandidateNotifMenu, setShowCandidateNotifMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
+  const cursorRef = useRef<HTMLDivElement>(null);
+  const spotlightRef = useRef<HTMLDivElement>(null);
+  const mouseRef = useRef({ x: -100, y: -100 });
+
+  // Cursor + Spotlight
+  useEffect(() => {
+    const cursor = cursorRef.current;
+    const spotlight = spotlightRef.current;
+    if (!cursor || !spotlight) return;
+
+    let cx = -100, cy = -100, sx = -100, sy = -100;
+    const onMove = (e: MouseEvent) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
+    window.addEventListener("mousemove", onMove);
+
+    let raf: number;
+    const tick = () => {
+      const { x: mx, y: my } = mouseRef.current;
+      cx += (mx - cx) * 0.2; cy += (my - cy) * 0.2;
+      sx += (mx - sx) * 0.05; sy += (my - sy) * 0.05;
+      cursor.style.left = cx + "px"; cursor.style.top = cy + "px";
+      spotlight.style.setProperty("--x", sx + "px");
+      spotlight.style.setProperty("--y", sy + "px");
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+
+    // Hover expand via event delegation
+    const onMouseOver = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target) return;
+      const hoverable = target.closest("button, a, .hoverable, [role='button'], .cursor-pointer, input, select, textarea");
+      if (hoverable) {
+        cursor.classList.add("cursor-hover");
+      }
+    };
+
+    const onMouseOut = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target) return;
+      const hoverable = target.closest("button, a, .hoverable, [role='button'], .cursor-pointer, input, select, textarea");
+      if (hoverable) {
+        const relatedTarget = e.relatedTarget as HTMLElement;
+        if (!relatedTarget || !relatedTarget.closest("button, a, .hoverable, [role='button'], .cursor-pointer, input, select, textarea")) {
+          cursor.classList.remove("cursor-hover");
+        }
+      }
+    };
+
+    window.addEventListener("mouseover", onMouseOver);
+    window.addEventListener("mouseout", onMouseOut);
+
+    return () => {
+      window.removeEventListener("mouseover", onMouseOver);
+      window.removeEventListener("mouseout", onMouseOut);
+      window.removeEventListener("mousemove", onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 1024);
     checkMobile();
@@ -111,7 +170,7 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
   const unreadCount = notifications.filter(n => !n.is_read).length;
 
   return (
-    <div className="min-h-screen bg-[#f8f8fc] flex">
+    <div className="min-h-screen bg-[#f8f8fc] flex custom-cursor-active" style={{ cursor: "none" }}>
       {/* Sidebar */}
       <>
         {/* Mobile overlay */}
@@ -130,26 +189,26 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
         <motion.aside
           initial={false}
           animate={{ x: isMobile ? (sidebarOpen ? 0 : -280) : 0 }}
-          className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-black/[0.06] flex flex-col z-50"
+          className="fixed left-0 top-0 bottom-0 w-64 bg-white border-r border-black/[0.08] flex flex-col z-50"
           style={{ transition: "transform 0.25s ease" }}
         >
           {/* Logo */}
-          <div className="p-5 border-b border-black/[0.06]">
+          <div className="p-5 border-b border-black/[0.08]">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate("/")}>
-                <div className={`w-8 h-8 ${accentColor} rounded-xl flex items-center justify-center`}>
-                  <Sparkles className="w-4 h-4 text-white" />
+                <div className="w-8 h-8 bg-[#0052CC]/[0.08] border border-[#0052CC]/15 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-4 h-4 text-[#0052CC]" />
                 </div>
-                <span className="font-black text-lg" style={{ fontFamily: 'var(--font-display)' }}>
-                  Talent<span className={accentText}>AI</span>
+                <span className="font-bold text-lg text-black tracking-tight" style={{ fontFamily: 'var(--font-display)' }}>
+                  Talent<span className="text-[#0052CC]">AI</span>
                 </span>
               </div>
-              <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-muted-foreground">
+              <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-muted-foreground hover:text-black transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
             <div className="mt-3">
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${role === 'candidate' ? 'bg-[#e9d5ff] text-primary' : 'bg-[#bae6fd] text-sky-600'}`}>
+              <span className={`text-xs font-mono font-bold px-2 py-0.5 rounded border uppercase tracking-wider ${role === 'candidate' ? 'bg-[#0052CC]/[0.06] text-[#0052CC] border-[#0052CC]/15' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
                 {role === "candidate" ? "Candidate Portal" : "Recruiter Portal"}
               </span>
             </div>
@@ -161,7 +220,7 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
               const active = activeTab ? activeTab === tabId : location.pathname === path;
               return (
                 <button
-                   key={label}
+                  key={label}
                   onClick={() => {
                     setSidebarOpen(false);
                     if (location.pathname !== path) {
@@ -169,13 +228,13 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
                     }
                     onTabChange?.(tabId);
                   }}
-                  className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-semibold transition-all ${
                     active
-                      ? `${role === 'candidate' ? 'bg-[#e9d5ff] text-primary' : 'bg-[#bae6fd] text-sky-700'}`
-                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                      ? "bg-[#0052CC]/[0.06] text-[#0052CC] border border-[#0052CC]/15"
+                      : "text-muted-foreground hover:bg-black/[0.02] hover:text-black border border-transparent"
                   }`}
                 >
-                  <Icon className="w-4 h-4" />
+                  <Icon className="w-4 h-4 flex-shrink-0" />
                   {label}
                 </button>
               );
@@ -183,25 +242,25 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
           </nav>
 
           {/* User profile */}
-          <div className="p-4 border-t border-black/[0.06]">
-            <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted cursor-pointer group">
-              <div className={`w-9 h-9 ${accentColor} rounded-xl flex items-center justify-center text-white text-sm font-bold flex-shrink-0`}>
-                {userName.split(" ").map(n => n[0]).join("").slice(0, 2)}
+          <div className="p-4 border-t border-black/[0.08]">
+            <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-black/[0.02] border border-transparent hover:border-black/[0.06] cursor-pointer group transition-all">
+              <div className="w-8 h-8 bg-[#0052CC]/[0.08] border border-[#0052CC]/15 rounded-lg flex items-center justify-center text-[#0052CC] text-xs font-bold flex-shrink-0">
+                {userName.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">{userName}</p>
-                <p className="text-xs text-muted-foreground capitalize">{role}</p>
+                <p className="text-sm font-semibold text-black truncate">{userName}</p>
+                <p className="text-xs text-muted-foreground capitalize mt-0.5">{role}</p>
               </div>
-              <ChevronDown className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
+              <ChevronDown className="w-3.5 h-3.5 text-muted-foreground group-hover:text-black transition-colors" />
             </div>
             <button
               onClick={async () => {
                 await signOut();
                 navigate("/login");
               }}
-              className="w-full flex items-center gap-2 mt-2 px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-red-50 rounded-xl transition-colors"
+              className="w-full flex items-center gap-2 mt-2 px-3 py-2 text-sm font-medium text-muted-foreground hover:text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-100 rounded-lg transition-all"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 flex-shrink-0" />
               Sign out
             </button>
           </div>
@@ -434,6 +493,10 @@ export function PortalLayout({ children, role, userName = "Sarah Johnson", activ
           </motion.div>
         </main>
       </div>
+
+      {/* Spotlight + Cursor */}
+      <div className="spotlight-overlay" ref={spotlightRef} />
+      <div className="custom-cursor" ref={cursorRef} />
     </div>
   );
 }

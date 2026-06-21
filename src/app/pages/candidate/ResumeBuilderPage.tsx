@@ -62,14 +62,14 @@ export function ResumeBuilderPage() {
           <button
             type="button"
             onClick={handleImportFromCV}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-xl text-sm font-bold shadow-md hover:from-violet-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-[#0052CC] hover:bg-[#0052CC]/95 text-white rounded-lg text-sm font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
           >
             <Sparkles className="w-4 h-4" /> Import from Latest CV
           </button>
           <button
             type="button"
             onClick={handleSaveResumeDraft}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-black/[0.08] text-foreground rounded-xl text-sm font-bold hover:bg-muted transition-all flex items-center justify-center gap-2"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white border border-black/[0.08] text-foreground rounded-lg text-sm font-bold hover:bg-black/5 transition-all flex items-center justify-center gap-2"
           >
             Save Draft
           </button>
@@ -80,9 +80,10 @@ export function ResumeBuilderPage() {
         {/* Form Block */}
         <div className="space-y-4 max-h-[850px] overflow-y-auto pr-2">
           {/* Personal & Contact Block */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 space-y-4">
+          <div className="bg-white rounded-xl border border-black/[0.08] p-5 space-y-4">
+            <span className="text-[10px] font-mono text-black/40 block">[ CONTACT INFORMATION ] </span>
             <h3
-              className="text-base font-black text-foreground"
+              className="text-base font-black text-foreground mt-[-8px]"
               style={{ fontFamily: "var(--font-display)" }}
             >
               1. Contact Information
@@ -97,7 +98,7 @@ export function ResumeBuilderPage() {
                   value={rbName}
                   onChange={(e) => setRbName(e.target.value)}
                   placeholder="John Doe"
-                  className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                 />
               </div>
               <div>
@@ -111,7 +112,7 @@ export function ResumeBuilderPage() {
                     setRbContact({ ...rbContact, email: e.target.value })
                   }
                   placeholder="john.doe@example.com"
-                  className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                 />
               </div>
               <div>
@@ -125,7 +126,7 @@ export function ResumeBuilderPage() {
                     setRbContact({ ...rbContact, phone: e.target.value })
                   }
                   placeholder="(123) 456-7890"
-                  className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                 />
               </div>
               <div className="col-span-2">
@@ -139,7 +140,7 @@ export function ResumeBuilderPage() {
                     setRbContact({ ...rbContact, address: e.target.value })
                   }
                   placeholder="Boston, MA"
-                  className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                 />
               </div>
               <div>
@@ -153,7 +154,7 @@ export function ResumeBuilderPage() {
                     setRbContact({ ...rbContact, linkedin: e.target.value })
                   }
                   placeholder="linkedin.com/in/johndoe"
-                  className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                 />
               </div>
               <div>
@@ -167,25 +168,28 @@ export function ResumeBuilderPage() {
                     setRbContact({ ...rbContact, portfolio: e.target.value })
                   }
                   placeholder="johndoe.dev"
-                  className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                 />
               </div>
             </div>
           </div>
 
           {/* Education Block */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 space-y-4">
+          <div className="bg-white rounded-xl border border-black/[0.08] p-5 space-y-4">
             <div className="flex justify-between items-center">
-              <h3
-                className="text-base font-black text-foreground"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                2. Education
-              </h3>
+              <div>
+                <span className="text-[10px] font-mono text-black/40 block">[ EDUCATION HISTORY ]</span>
+                <h3
+                  className="text-base font-black text-foreground mt-[-2px]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  2. Education
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={addEducation}
-                className="flex items-center gap-1 text-xs text-primary font-bold hover:underline"
+                className="flex items-center gap-1 text-xs text-[#0052CC] font-bold hover:underline font-mono uppercase tracking-wider"
               >
                 <Plus className="w-3.5 h-3.5" /> Add School
               </button>
@@ -193,7 +197,7 @@ export function ResumeBuilderPage() {
             {rbEducationList.map((edu, index) => (
               <div
                 key={index}
-                className="p-4 bg-muted/20 rounded-xl border border-black/[0.04] space-y-3 relative"
+                className="p-4 bg-black/[0.01] rounded-lg border border-black/[0.06] space-y-3 relative"
               >
                 <button
                   type="button"
@@ -212,7 +216,7 @@ export function ResumeBuilderPage() {
                         updateEducation(index, "university", e.target.value)
                       }
                       required
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -224,7 +228,7 @@ export function ResumeBuilderPage() {
                         updateEducation(index, "degree", e.target.value)
                       }
                       required
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -235,7 +239,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateEducation(index, "gpa", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -246,7 +250,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateEducation(index, "startYear", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -257,7 +261,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateEducation(index, "endYear", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div className="col-span-2">
@@ -268,7 +272,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateEducation(index, "location", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div className="col-span-2">
@@ -283,7 +287,7 @@ export function ResumeBuilderPage() {
                         )
                       }
                       rows={2}
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                 </div>
@@ -292,18 +296,21 @@ export function ResumeBuilderPage() {
           </div>
 
           {/* Experience Block */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 space-y-4">
+          <div className="bg-white rounded-xl border border-black/[0.08] p-5 space-y-4">
             <div className="flex justify-between items-center">
-              <h3
-                className="text-base font-black text-foreground"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                3. Experience
-              </h3>
+              <div>
+                <span className="text-[10px] font-mono text-black/40 block">[ PROFESSIONAL EXPERIENCE ]</span>
+                <h3
+                  className="text-base font-black text-foreground mt-[-2px]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  3. Experience
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={addExperience}
-                className="flex items-center gap-1 text-xs text-primary font-bold hover:underline"
+                className="flex items-center gap-1 text-xs text-[#0052CC] font-bold hover:underline font-mono uppercase tracking-wider"
               >
                 <Plus className="w-3.5 h-3.5" /> Add Experience
               </button>
@@ -311,7 +318,7 @@ export function ResumeBuilderPage() {
             {rbExperiences.map((exp, index) => (
               <div
                 key={index}
-                className="p-4 bg-muted/20 rounded-xl border border-black/[0.04] space-y-3 relative"
+                className="p-4 bg-black/[0.01] rounded-lg border border-black/[0.06] space-y-3 relative"
               >
                 <button
                   type="button"
@@ -330,7 +337,7 @@ export function ResumeBuilderPage() {
                         updateExperience(index, "company", e.target.value)
                       }
                       required
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -342,7 +349,7 @@ export function ResumeBuilderPage() {
                         updateExperience(index, "position", e.target.value)
                       }
                       required
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -353,7 +360,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateExperience(index, "startDate", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -364,7 +371,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateExperience(index, "endDate", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div className="col-span-2">
@@ -375,7 +382,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateExperience(index, "location", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div className="col-span-2">
@@ -386,7 +393,7 @@ export function ResumeBuilderPage() {
                         updateExperience(index, "description", e.target.value)
                       }
                       rows={3}
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                 </div>
@@ -395,18 +402,21 @@ export function ResumeBuilderPage() {
           </div>
 
           {/* Projects Block */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 space-y-4">
+          <div className="bg-white rounded-xl border border-black/[0.08] p-5 space-y-4">
             <div className="flex justify-between items-center">
-              <h3
-                className="text-base font-black text-foreground"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                4. Projects
-              </h3>
+              <div>
+                <span className="text-[10px] font-mono text-black/40 block">[ PERSONAL PROJECTS ]</span>
+                <h3
+                  className="text-base font-black text-foreground mt-[-2px]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  4. Projects
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={addProject}
-                className="flex items-center gap-1 text-xs text-primary font-bold hover:underline"
+                className="flex items-center gap-1 text-xs text-[#0052CC] font-bold hover:underline font-mono uppercase tracking-wider"
               >
                 <Plus className="w-3.5 h-3.5" /> Add Project
               </button>
@@ -414,7 +424,7 @@ export function ResumeBuilderPage() {
             {rbProjects.map((proj, index) => (
               <div
                 key={index}
-                className="p-4 bg-muted/20 rounded-xl border border-black/[0.04] space-y-3 relative"
+                className="p-4 bg-black/[0.01] rounded-lg border border-black/[0.06] space-y-3 relative"
               >
                 <button
                   type="button"
@@ -433,7 +443,7 @@ export function ResumeBuilderPage() {
                         updateProject(index, "projectName", e.target.value)
                       }
                       required
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -444,7 +454,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateProject(index, "role", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div className="col-span-2">
@@ -455,7 +465,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateProject(index, "technologies", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div className="col-span-2">
@@ -466,7 +476,7 @@ export function ResumeBuilderPage() {
                         updateProject(index, "description", e.target.value)
                       }
                       rows={3}
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                 </div>
@@ -474,19 +484,22 @@ export function ResumeBuilderPage() {
             ))}
           </div>
 
-          {/* Leadership Block */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 space-y-4">
+          {/* Leadership & Activities Block */}
+          <div className="bg-white rounded-xl border border-black/[0.08] p-5 space-y-4">
             <div className="flex justify-between items-center">
-              <h3
-                className="text-base font-black text-foreground"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                5. Leadership & Activities
-              </h3>
+              <div>
+                <span className="text-[10px] font-mono text-black/40 block">[ LEADERSHIP ACTIVITIES ]</span>
+                <h3
+                  className="text-base font-black text-foreground mt-[-2px]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  5. Leadership & Activities
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={addLeadership}
-                className="flex items-center gap-1 text-xs text-primary font-bold hover:underline"
+                className="flex items-center gap-1 text-xs text-[#0052CC] font-bold hover:underline font-mono uppercase tracking-wider"
               >
                 <Plus className="w-3.5 h-3.5" /> Add Activity
               </button>
@@ -494,7 +507,7 @@ export function ResumeBuilderPage() {
             {rbLeadership.map((lead, index) => (
               <div
                 key={index}
-                className="p-4 bg-muted/20 rounded-xl border border-black/[0.04] space-y-3 relative"
+                className="p-4 bg-black/[0.01] rounded-lg border border-black/[0.06] space-y-3 relative"
               >
                 <button
                   type="button"
@@ -513,7 +526,7 @@ export function ResumeBuilderPage() {
                         updateLeadership(index, "organization", e.target.value)
                       }
                       required
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -525,7 +538,7 @@ export function ResumeBuilderPage() {
                         updateLeadership(index, "role", e.target.value)
                       }
                       required
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -536,7 +549,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateLeadership(index, "startDate", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -547,7 +560,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateLeadership(index, "endDate", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div className="col-span-2">
@@ -558,7 +571,7 @@ export function ResumeBuilderPage() {
                         updateLeadership(index, "description", e.target.value)
                       }
                       rows={2}
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                 </div>
@@ -567,13 +580,16 @@ export function ResumeBuilderPage() {
           </div>
 
           {/* Skills Block */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 space-y-4">
-            <h3
-              className="text-base font-black text-foreground"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              6. Skills
-            </h3>
+          <div className="bg-white rounded-xl border border-black/[0.08] p-5 space-y-4">
+            <div>
+              <span className="text-[10px] font-mono text-black/40 block">[ TECHNICAL SKILLSET ]</span>
+              <h3
+                className="text-base font-black text-foreground mt-[-2px]"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                6. Skills
+              </h3>
+            </div>
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-semibold text-foreground mb-1 block">
@@ -589,7 +605,7 @@ export function ResumeBuilderPage() {
                     })
                   }
                   placeholder="e.g. Python, Java, SQL, JavaScript"
-                  className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                 />
               </div>
               <div>
@@ -606,7 +622,7 @@ export function ResumeBuilderPage() {
                     })
                   }
                   placeholder="e.g. System Design, REST APIs, Microservices"
-                  className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                 />
               </div>
               <div>
@@ -620,7 +636,7 @@ export function ResumeBuilderPage() {
                     setRbSkillsObj({ ...rbSkillsObj, tools: e.target.value })
                   }
                   placeholder="e.g. Git, Docker, Kubernetes, AWS, JIRA"
-                  className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                 />
               </div>
               <div>
@@ -637,25 +653,28 @@ export function ResumeBuilderPage() {
                     })
                   }
                   placeholder="e.g. Leadership, Mentoring, Public Speaking"
-                  className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                  className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                 />
               </div>
             </div>
           </div>
 
           {/* Certifications Block */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 space-y-4">
+          <div className="bg-white rounded-xl border border-black/[0.08] p-5 space-y-4">
             <div className="flex justify-between items-center">
-              <h3
-                className="text-base font-black text-foreground"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                7. Certifications
-              </h3>
+              <div>
+                <span className="text-[10px] font-mono text-black/40 block">[ CERTIFICATIONS ]</span>
+                <h3
+                  className="text-base font-black text-foreground mt-[-2px]"
+                  style={{ fontFamily: "var(--font-display)" }}
+                >
+                  7. Certifications
+                </h3>
+              </div>
               <button
                 type="button"
                 onClick={addCertification}
-                className="flex items-center gap-1 text-xs text-primary font-bold hover:underline"
+                className="flex items-center gap-1 text-xs text-[#0052CC] font-bold hover:underline font-mono uppercase tracking-wider"
               >
                 <Plus className="w-3.5 h-3.5" /> Add Certification
               </button>
@@ -663,7 +682,7 @@ export function ResumeBuilderPage() {
             {rbCertificationsList.map((cert, index) => (
               <div
                 key={index}
-                className="p-4 bg-muted/20 rounded-xl border border-black/[0.04] space-y-3 relative"
+                className="p-4 bg-black/[0.01] rounded-lg border border-black/[0.06] space-y-3 relative"
               >
                 <button
                   type="button"
@@ -682,7 +701,7 @@ export function ResumeBuilderPage() {
                         updateCertification(index, "name", e.target.value)
                       }
                       required
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div className="col-span-2">
@@ -693,7 +712,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateCertification(index, "issuer", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                   <div>
@@ -704,7 +723,7 @@ export function ResumeBuilderPage() {
                       onChange={(e) =>
                         updateCertification(index, "date", e.target.value)
                       }
-                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-primary"
+                      className="w-full px-3 py-1.5 bg-white rounded-lg border border-black/[0.08] text-xs focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
                     />
                   </div>
                 </div>
@@ -713,31 +732,36 @@ export function ResumeBuilderPage() {
           </div>
 
           {/* Interests Block */}
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5 space-y-4">
-            <h3
-              className="text-base font-black text-foreground"
-              style={{ fontFamily: "var(--font-display)" }}
-            >
-              8. Interests
-            </h3>
+          <div className="bg-white rounded-xl border border-black/[0.08] p-5 space-y-4">
+            <div>
+              <span className="text-[10px] font-mono text-black/40 block">[ INTERESTS ]</span>
+              <h3
+                className="text-base font-black text-foreground mt-[-2px]"
+                style={{ fontFamily: "var(--font-display)" }}
+              >
+                8. Interests
+              </h3>
+            </div>
             <textarea
               placeholder="e.g. Hiking, Marathon Running, Chess, Open-source development"
               value={rbInterestsStr}
               onChange={(e) => setRbInterestsStr(e.target.value)}
               rows={2}
-              className="w-full px-4 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+              className="w-full px-4 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
             />
           </div>
 
-          <div className="bg-white rounded-2xl border border-black/[0.06] p-5">
+          {/* AI Optimization Block */}
+          <div className="bg-white rounded-xl border border-black/[0.08] p-5">
             <div className="mb-4">
-              <label className="text-sm font-semibold text-foreground mb-1 block">
+              <span className="text-[10px] font-mono text-black/40 block">[ AI RESUME OPTIMIZATION ]</span>
+              <label className="text-xs font-semibold text-foreground mb-1 block mt-1">
                 Target Job Category for AI Optimization
               </label>
               <select
                 value={rbTargetJob}
                 onChange={(e) => setRbTargetJob(e.target.value)}
-                className="w-full px-3 py-2 bg-muted/40 rounded-xl border border-black/[0.08] text-sm focus:outline-none focus:border-primary"
+                className="w-full px-3 py-2 bg-black/[0.02] rounded-lg border border-black/[0.08] text-sm focus:outline-none focus:border-[#0052CC] hover:border-black/20 transition-all"
               >
                 <option value="Backend Developer">Backend Developer</option>
                 <option value="Data Analyst">Data Analyst</option>
@@ -754,7 +778,7 @@ export function ResumeBuilderPage() {
               type="button"
               onClick={handleOptimizeResume}
               disabled={optimizing}
-              className="w-full bg-primary text-white py-3 rounded-xl font-bold text-sm hover:bg-primary/90 transition-all hover:shadow-lg disabled:opacity-75 flex items-center justify-center gap-2"
+              className="w-full bg-[#0052CC] hover:bg-[#0052CC]/95 text-white py-3 rounded-lg font-bold text-sm transition-all disabled:opacity-75 flex items-center justify-center gap-2 font-mono uppercase tracking-wider shadow-sm"
             >
               {optimizing ? (
                 <>
@@ -771,11 +795,12 @@ export function ResumeBuilderPage() {
         </div>
 
         {/* Harvard Paper Preview Block */}
-        <div className="bg-white rounded-2xl border border-black/[0.06] p-5 flex flex-col justify-between h-[850px] sticky top-24">
+        <div className="bg-white rounded-xl border border-black/[0.08] p-5 flex flex-col justify-between h-[850px] sticky top-24">
           <div className="flex justify-between items-center pb-4 border-b border-black/[0.06] flex-shrink-0">
             <div>
+              <span className="text-[10px] font-mono text-black/40 block">[ HARVARD CV TEMPLATE ]</span>
               <h3
-                className="text-base font-black text-foreground"
+                className="text-base font-black text-foreground mt-[-2px]"
                 style={{ fontFamily: "var(--font-display)" }}
               >
                 Live Harvard CV Preview
@@ -788,7 +813,7 @@ export function ResumeBuilderPage() {
               <button
                 type="button"
                 onClick={() => handleDownloadPDF("harvard")}
-                className="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-3 py-1.5 bg-black hover:bg-black/90 text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
                 title="Download PDF"
               >
                 <Download className="w-3.5 h-3.5" /> PDF
@@ -797,7 +822,7 @@ export function ResumeBuilderPage() {
               <button
                 type="button"
                 onClick={handleDownloadWord}
-                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
+                className="px-3 py-1.5 bg-white border border-black/[0.08] hover:bg-black/5 text-black rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
                 title="Download Word (DOCX)"
               >
                 <Download className="w-3.5 h-3.5" /> Word

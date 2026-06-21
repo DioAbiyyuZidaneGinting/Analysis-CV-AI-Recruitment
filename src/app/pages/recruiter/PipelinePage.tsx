@@ -14,12 +14,12 @@ function getAuthHeaders(): Record<string, string> {
 // Each stage maps to its allowed next transitions.
 // "accepted" and "rejected" are final states — no further transitions.
 const WORKFLOW: Record<string, { next: string[]; reject: boolean }> = {
-  submitted:  { next: ["screening"],  reject: true  },
-  screening:  { next: ["interview"],  reject: true  },
-  interview:  { next: ["offered"],    reject: true  },
-  offered:    { next: ["accepted"],   reject: true  },
-  accepted:   { next: [],             reject: false },
-  rejected:   { next: [],             reject: false },
+  submitted: { next: ["screening"], reject: true },
+  screening: { next: ["interview"], reject: true },
+  interview: { next: ["offered"], reject: true },
+  offered: { next: ["accepted"], reject: true },
+  accepted: { next: [], reject: false },
+  rejected: { next: [], reject: false },
 };
 
 // All statuses that a drag-drop into a column is valid from.
@@ -34,44 +34,44 @@ function isValidTransition(fromStatus: string, toStatus: string): boolean {
 
 // ─── Pipeline columns config ───────────────────────────────────────────────────
 const PIPELINE_COLUMNS = [
-  { id: "submitted",  label: "Applied",    color: "border-sky-200 bg-sky-50",         badge: "bg-sky-100 text-sky-700",         step: 0 },
-  { id: "screening",  label: "Screening",  color: "border-orange-200 bg-orange-50",   badge: "bg-orange-100 text-orange-700",   step: 1 },
-  { id: "interview",  label: "Interview",  color: "border-violet-200 bg-violet-50",   badge: "bg-violet-100 text-violet-700",   step: 2 },
-  { id: "offered",    label: "Offered",    color: "border-pink-200 bg-pink-50",       badge: "bg-pink-100 text-pink-700",       step: 3 },
-  { id: "accepted",   label: "Accepted",   color: "border-emerald-200 bg-emerald-50", badge: "bg-emerald-100 text-emerald-700", step: 4 },
-  { id: "rejected",   label: "Rejected",   color: "border-red-200 bg-red-50",         badge: "bg-red-100 text-red-600",         step: -1 },
+  { id: "submitted", label: "Applied", accent: "bg-[#0052CC]", text: "text-[#0052CC]", border: "border-t-[#0052CC]", badge: "bg-[#0052CC]/[0.08] text-[#0052CC] border-[#0052CC]/15" },
+  { id: "screening", label: "Screening", accent: "bg-amber-500", text: "text-amber-600", border: "border-t-amber-500", badge: "bg-amber-500/[0.08] text-amber-700 border-amber-500/15" },
+  { id: "interview", label: "Interview", accent: "bg-violet-500", text: "text-violet-600", border: "border-t-violet-500", badge: "bg-violet-500/[0.08] text-violet-700 border-violet-500/15" },
+  { id: "offered", label: "Offered", accent: "bg-pink-500", text: "text-pink-600", border: "border-t-pink-500", badge: "bg-pink-500/[0.08] text-pink-700 border-pink-500/15" },
+  { id: "accepted", label: "Accepted", accent: "bg-emerald-500", text: "text-emerald-600", border: "border-t-emerald-500", badge: "bg-emerald-500/[0.08] text-emerald-700 border-emerald-500/15" },
+  { id: "rejected", label: "Rejected", accent: "bg-rose-500", text: "text-rose-600", border: "border-t-rose-500", badge: "bg-rose-500/[0.08] text-rose-700 border-rose-500/15" },
 ];
 
 const STATUS_COLORS: Record<string, string> = {
-  submitted: "bg-[#bae6fd] text-sky-700",
-  screening: "bg-[#ffd6a5] text-orange-700",
-  interview: "bg-[#e9d5ff] text-violet-700",
-  offered:   "bg-[#fbcfe8] text-pink-700",
-  accepted:  "bg-[#b8f2e6] text-emerald-700",
-  rejected:  "bg-[#fecdd3] text-red-600",
+  submitted: "bg-[#0052CC]/[0.06] text-[#0052CC] border border-[#0052CC]/15",
+  screening: "bg-amber-500/[0.06] text-amber-700 border border-amber-500/15",
+  interview: "bg-violet-500/[0.06] text-violet-700 border border-violet-500/15",
+  offered: "bg-pink-500/[0.06] text-pink-700 border border-pink-500/15",
+  accepted: "bg-emerald-500/[0.06] text-emerald-700 border border-emerald-500/15",
+  rejected: "bg-rose-500/[0.06] text-rose-700 border border-rose-500/15",
 };
 
 const STATUS_LABELS: Record<string, string> = {
   submitted: "Applied",
   screening: "Screening",
   interview: "Interview",
-  offered:   "Offered",
-  accepted:  "Accepted",
-  rejected:  "Rejected",
+  offered: "Offered",
+  accepted: "Accepted",
+  rejected: "Rejected",
 };
 
 const NEXT_LABEL: Record<string, string> = {
   submitted: "Move to Screening",
   screening: "Move to Interview",
   interview: "Move to Offered",
-  offered:   "Accept Candidate",
+  offered: "Accept Candidate",
 };
 
 const NEXT_COLOR: Record<string, string> = {
-  submitted: "bg-orange-500 hover:bg-orange-600 text-white",
-  screening: "bg-violet-500 hover:bg-violet-600 text-white",
-  interview: "bg-pink-500 hover:bg-pink-600 text-white",
-  offered:   "bg-emerald-500 hover:bg-emerald-600 text-white",
+  submitted: "bg-amber-600 hover:bg-amber-700 text-white shadow-sm",
+  screening: "bg-violet-600 hover:bg-violet-700 text-white shadow-sm",
+  interview: "bg-pink-600 hover:bg-pink-700 text-white shadow-sm",
+  offered: "bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm",
 };
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -119,8 +119,8 @@ function WorkflowStepper({ status }: { status: string }) {
   const currentIdx = isRejected ? -1 : MAIN_STEPS.indexOf(status);
 
   return (
-    <div className="space-y-2">
-      <p className="text-[10px] uppercase font-black text-muted-foreground tracking-widest">Recruitment Progress</p>
+    <div className="space-y-3">
+      <p className="text-[9px] uppercase font-bold text-muted-foreground tracking-wider font-mono">Recruitment Process</p>
       <div className="flex items-center gap-1">
         {MAIN_STEPS.map((step, idx) => {
           const past = !isRejected && idx < currentIdx;
@@ -128,29 +128,29 @@ function WorkflowStepper({ status }: { status: string }) {
           const future = isRejected || idx > currentIdx;
           return (
             <div key={step} className="flex items-center gap-1 flex-1 min-w-0">
-              <div className={`flex flex-col items-center flex-1 min-w-0`}>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[9px] font-black transition-all flex-shrink-0
-                  ${active ? "bg-primary text-white ring-2 ring-primary/30" :
-                    past ? "bg-emerald-500 text-white" :
-                    "bg-muted text-muted-foreground"}`}>
-                  {past ? <CheckCircle2 className="w-3.5 h-3.5" /> : idx + 1}
+              <div className="flex flex-col items-center flex-1 min-w-0">
+                <div className={`w-5 h-5 rounded border flex items-center justify-center text-[9px] font-mono font-bold transition-all flex-shrink-0
+                  ${active ? "bg-[#0052CC] text-white border-[#0052CC] shadow-[0_0_8px_rgba(0,82,204,0.3)]" :
+                    past ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20" :
+                      "bg-black/[0.02] text-muted-foreground border-black/[0.08]"}`}>
+                  {past ? "✓" : `0${idx + 1}`}
                 </div>
-                <p className={`text-[8px] font-bold mt-0.5 truncate w-full text-center
-                  ${active ? "text-primary" : past ? "text-emerald-600" : "text-muted-foreground"}`}>
+                <p className={`text-[8px] font-mono font-bold mt-1.5 truncate w-full text-center uppercase tracking-wider
+                  ${active ? "text-[#0052CC]" : past ? "text-emerald-600" : "text-muted-foreground"}`}>
                   {STATUS_LABELS[step]}
                 </p>
               </div>
               {idx < MAIN_STEPS.length - 1 && (
-                <div className={`h-0.5 flex-1 rounded-full mt-[-12px] mx-[-2px] transition-all
-                  ${past ? "bg-emerald-400" : "bg-muted"}`} />
+                <div className={`h-[1px] flex-1 mt-[-16px] mx-[-1px] transition-all
+                  ${past ? "bg-emerald-400" : "bg-black/[0.08]"}`} />
               )}
             </div>
           );
         })}
       </div>
       {isRejected && (
-        <div className="flex items-center gap-2 mt-1 text-xs text-red-600 font-semibold">
-          <XCircle className="w-3.5 h-3.5" /> Candidate was rejected from the process
+        <div className="flex items-center gap-2 mt-2 text-[10px] text-rose-700 bg-rose-50 border border-rose-100 px-3 py-1.5 rounded font-mono uppercase font-bold">
+          <XCircle className="w-3.5 h-3.5" /> Candidate was rejected
         </div>
       )}
     </div>
@@ -160,17 +160,24 @@ function WorkflowStepper({ status }: { status: string }) {
 // ─── Score badge ───────────────────────────────────────────────────────────────
 
 function ScoreBadge({ score }: { score: number }) {
-  const color = score >= 90 ? "bg-[#b8f2e6] text-emerald-700" : score >= 75 ? "bg-[#e9d5ff] text-primary" : "bg-[#ffd6a5] text-orange-700";
-  return <span className={`${color} text-xs font-black px-2 py-0.5 rounded-full`}>{score}</span>;
+  const color = score >= 90
+    ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20"
+    : score >= 75
+      ? "bg-[#0052CC]/10 text-[#0052CC] border-[#0052CC]/20"
+      : "bg-amber-500/10 text-amber-700 border-amber-500/20";
+  return (
+    <span className={`${color} text-[10px] font-mono font-bold px-2 py-0.5 rounded border uppercase tracking-wider`}>
+      {score}
+    </span>
+  );
 }
 
-// ─── Candidate detail panel ────────────────────────────────────────────────────
-
-function CandidateDetailPanel({ candidate, onClose, onMove, loading }: {
+function CandidateDetailPanel({ candidate, onClose, onMove, loading, showToast }: {
   candidate: Candidate;
   onClose: () => void;
   onMove: (candidateId: string, newStatus: string) => Promise<void>;
   loading: boolean;
+  showToast: (message: string, type?: "success" | "error" | "info") => void;
 }) {
   const workflow = WORKFLOW[candidate.status];
   const isFinal = candidate.status === "accepted" || candidate.status === "rejected";
@@ -181,35 +188,35 @@ function CandidateDetailPanel({ candidate, onClose, onMove, loading }: {
       initial={{ opacity: 0, x: 40 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 40 }}
-      className="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-white border-l border-black/[0.06] z-50 overflow-y-auto shadow-2xl"
+      className="fixed right-0 top-0 bottom-0 w-full max-w-lg bg-white border-l border-black/[0.08] z-50 overflow-y-auto shadow-2xl"
     >
-      <div className="p-6 space-y-5">
+      <div className="p-6 space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-4">
-            <div className={`w-14 h-14 ${candidate.avatarBg || 'bg-primary'} rounded-2xl flex items-center justify-center text-white font-black text-lg`}>
+            <div className="w-12 h-12 bg-[#0052CC]/[0.08] border border-[#0052CC]/15 rounded-lg flex items-center justify-center text-[#0052CC] font-mono font-bold text-lg">
               {candidate.avatar}
             </div>
             <div>
-              <h2 className="font-black text-xl text-foreground" style={{ fontFamily: 'var(--font-display)' }}>{candidate.name}</h2>
-              <p className="text-muted-foreground text-sm">{candidate.role}</p>
-              <span className={`inline-block mt-1 text-xs font-semibold px-2.5 py-0.5 rounded-full ${STATUS_COLORS[candidate.status] || 'bg-muted text-muted-foreground'}`}>
+              <h2 className="font-black text-lg text-foreground leading-tight" style={{ fontFamily: 'var(--font-display)' }}>{candidate.name}</h2>
+              <p className="text-muted-foreground text-xs mt-0.5">{candidate.role}</p>
+              <span className={`inline-block mt-1.5 text-[10px] font-bold px-2.5 py-0.5 rounded-full ${STATUS_COLORS[candidate.status] || 'bg-muted text-muted-foreground border border-black/[0.08]'}`}>
                 {STATUS_LABELS[candidate.status] ?? candidate.status}
               </span>
             </div>
           </div>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1">
-            <XCircle className="w-6 h-6" />
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 transition-colors">
+            <XCircle className="w-5 h-5" />
           </button>
         </div>
 
         {/* Workflow stepper */}
-        <div className="bg-[#f8f8fc] rounded-2xl p-4 border border-black/[0.04]">
+        <div className="bg-black/[0.01] border border-black/[0.08] rounded-lg p-4">
           <WorkflowStepper status={candidate.status} />
         </div>
 
         {/* Contact info */}
-        <div className="grid grid-cols-2 gap-3 text-sm">
+        <div className="grid grid-cols-2 gap-3 text-xs border border-black/[0.08] rounded-lg p-3 bg-black/[0.01]">
           {[
             { icon: Mail, text: candidate.email },
             { icon: MapPin, text: candidate.location || "No location provided" },
@@ -217,51 +224,51 @@ function CandidateDetailPanel({ candidate, onClose, onMove, loading }: {
             { icon: Award, text: candidate.salary ? `${candidate.salary} expected` : "Salary not specified" },
           ].map(({ icon: Icon, text }) => (
             <div key={text} className="flex items-center gap-2 text-muted-foreground">
-              <Icon className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate">{text}</span>
+              <Icon className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate text-xs font-medium">{text}</span>
             </div>
           ))}
         </div>
 
         {/* AI Evaluation */}
-        <div className="bg-[#f0f0ff] border border-primary/20 rounded-2xl p-5">
+        <div className="bg-[#0052CC]/[0.02] border border-[#0052CC]/12 rounded-lg p-5">
           <div className="flex items-center gap-2 mb-3">
-            <Brain className="w-5 h-5 text-primary" />
-            <h3 className="font-black text-sm text-primary" style={{ fontFamily: 'var(--font-display)' }}>AI Evaluation</h3>
+            <Brain className="w-4 h-4 text-[#0052CC]" />
+            <h3 className="font-black text-xs text-[#0052CC] uppercase tracking-wide" style={{ fontFamily: 'var(--font-display)' }}>AI Evaluation Summary</h3>
           </div>
-          <p className="text-sm text-foreground leading-relaxed">{candidate.aiNote}</p>
+          <p className="text-xs text-foreground/80 leading-relaxed font-sans">{candidate.aiNote}</p>
           <div className="grid grid-cols-3 gap-3 mt-4">
-            <div className="bg-white rounded-xl p-3 text-center border border-black/[0.04]">
-              <p className="text-2xl font-black text-primary" style={{ fontFamily: 'var(--font-display)' }}>{candidate.cvScore}</p>
-              <p className="text-[10px] text-muted-foreground">CV Score</p>
+            <div className="bg-white rounded-lg p-3 text-center border border-black/[0.06]">
+              <p className="text-xl font-black text-[#0052CC]" style={{ fontFamily: 'var(--font-display)' }}>{candidate.cvScore}</p>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground mt-0.5">CV Score</p>
             </div>
-            <div className="bg-white rounded-xl p-3 text-center border border-black/[0.04]">
-              <p className="text-2xl font-black text-secondary" style={{ fontFamily: 'var(--font-display)' }}>{candidate.atsScore}</p>
-              <p className="text-[10px] text-muted-foreground">ATS Score</p>
+            <div className="bg-white rounded-lg p-3 text-center border border-black/[0.06]">
+              <p className="text-xl font-black text-slate-700" style={{ fontFamily: 'var(--font-display)' }}>{candidate.atsScore}</p>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground mt-0.5">ATS Score</p>
             </div>
-            <div className="bg-white rounded-xl p-3 text-center border border-black/[0.04]">
-              <p className="text-2xl font-black text-emerald-600" style={{ fontFamily: 'var(--font-display)' }}>{candidate.hiringChance}%</p>
-              <p className="text-[10px] text-muted-foreground">Hiring Chance</p>
+            <div className="bg-white rounded-lg p-3 text-center border border-black/[0.06]">
+              <p className="text-xl font-black text-emerald-600" style={{ fontFamily: 'var(--font-display)' }}>{candidate.hiringChance}%</p>
+              <p className="text-[10px] uppercase font-bold text-muted-foreground mt-0.5">Hiring Chance</p>
             </div>
           </div>
         </div>
 
-        {/* Match Analysis bars */}
-        <div>
-          <h3 className="font-black text-sm text-foreground mb-3" style={{ fontFamily: 'var(--font-display)' }}>Match Analysis</h3>
+        {/* Match Analysis */}
+        <div className="space-y-4">
+          <h3 className="font-black text-xs text-foreground uppercase tracking-wide" style={{ fontFamily: 'var(--font-display)' }}>Match Breakdown</h3>
           <div className="space-y-3">
             {[
-              { label: "Technical Skills Match",        score: candidate.cvScore || 0,               color: "bg-primary" },
-              { label: "AI Cultural Fit Prediction",    score: candidate.culturalFitScore || 70,     color: "bg-secondary" },
-              { label: "AI Communication Assessment",   score: candidate.communicationScore || 70,   color: "bg-[#f472b6]" },
-              { label: "Experience Relevance Alignment",score: candidate.skillScore || 60,            color: "bg-[#4ade80]" },
+              { label: "Technical Skills Match", score: candidate.cvScore || 0, color: "bg-[#0052CC]" },
+              { label: "AI Cultural Fit Prediction", score: candidate.culturalFitScore || 70, color: "bg-slate-700" },
+              { label: "AI Communication Assessment", score: candidate.communicationScore || 70, color: "bg-pink-600" },
+              { label: "Experience Relevance Alignment", score: candidate.skillScore || 60, color: "bg-emerald-500" },
             ].map(({ label, score, color }) => (
               <div key={label}>
-                <div className="flex justify-between text-sm mb-1">
-                  <span className="text-muted-foreground text-xs">{label}</span>
-                  <span className="font-bold text-foreground text-xs">{score}%</span>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-muted-foreground text-[10px]">{label}</span>
+                  <span className="font-bold text-foreground text-[10px]">{score}%</span>
                 </div>
-                <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                <div className="h-1 bg-black/[0.04] rounded-full overflow-hidden">
                   <motion.div
                     className={`h-full ${color} rounded-full`}
                     initial={{ width: 0 }}
@@ -275,46 +282,46 @@ function CandidateDetailPanel({ candidate, onClose, onMove, loading }: {
         </div>
 
         {/* Skills */}
-        <div>
-          <h3 className="font-black text-sm text-foreground mb-3" style={{ fontFamily: 'var(--font-display)' }}>Skills</h3>
+        <div className="space-y-3">
+          <h3 className="font-black text-xs text-foreground uppercase tracking-wide" style={{ fontFamily: 'var(--font-display)' }}>Skills</h3>
           <div className="flex flex-wrap gap-2">
             {candidate.skills && candidate.skills.length > 0 ? candidate.skills.map((skill: string) => (
-              <span key={skill} className="bg-[#e9d5ff] text-primary text-xs font-semibold px-3 py-1.5 rounded-full">
+              <span key={skill} className="bg-[#0052CC]/[0.06] text-[#0052CC] border border-[#0052CC]/15 text-[10px] font-bold px-2.5 py-1 rounded-full">
                 {skill}
               </span>
             )) : <span className="text-muted-foreground text-xs italic">No skills analyzed</span>}
           </div>
         </div>
 
-        {/* ── Workflow Actions ─────────────────────────────── */}
-        <div className="space-y-3 pt-1">
-          <h3 className="font-black text-sm text-foreground" style={{ fontFamily: 'var(--font-display)' }}>Actions</h3>
+        {/* Workflow Actions */}
+        <div className="space-y-3 pt-4 border-t border-black/[0.08]">
+          <h3 className="font-black text-xs text-foreground uppercase tracking-wide" style={{ fontFamily: 'var(--font-display)' }}>Actions</h3>
 
           {isFinal ? (
-            <div className={`flex items-center gap-2 px-4 py-3 rounded-xl text-sm font-semibold
+            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-bold
               ${candidate.status === "accepted"
                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                : "bg-red-50 text-red-600 border border-red-200"}`}>
+                : "bg-rose-50 text-rose-700 border border-rose-200"}`}>
               {candidate.status === "accepted"
-                ? <><CheckCircle2 className="w-4 h-4" /> Candidate accepted — final stage</>
-                : <><XCircle className="w-4 h-4" /> Candidate rejected — final stage</>}
+                ? <><CheckCircle2 className="w-4 h-4" /> Candidate Accepted — Final stage</>
+                : <><XCircle className="w-4 h-4" /> Candidate Rejected — Final stage</>}
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-3">
               {/* Primary: advance to next stage */}
               {nextStatus && (
                 <button
                   disabled={loading}
                   onClick={() => onMove(candidate.id, nextStatus)}
-                  className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all hover:shadow-md disabled:opacity-60 disabled:cursor-not-allowed
-                    ${NEXT_COLOR[candidate.status] || "bg-primary hover:bg-primary/90 text-white"}`}
+                  className={`flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all disabled:opacity-60 disabled:cursor-not-allowed text-white shadow-sm
+                    ${NEXT_COLOR[candidate.status] || "bg-[#0052CC] hover:bg-[#0052CC]/90"}`}
                 >
                   {loading ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   ) : (
-                    <ArrowRight className="w-4 h-4" />
+                    <ArrowRight className="w-3.5 h-3.5" />
                   )}
-                  {NEXT_LABEL[candidate.status] ?? `Move to ${STATUS_LABELS[nextStatus]}`}
+                  {NEXT_LABEL[candidate.status] ? NEXT_LABEL[candidate.status] : `Move to ${STATUS_LABELS[nextStatus]}`}
                 </button>
               )}
 
@@ -323,17 +330,11 @@ function CandidateDetailPanel({ candidate, onClose, onMove, loading }: {
                 <button
                   disabled={loading}
                   onClick={() => onMove(candidate.id, "rejected")}
-                  className="w-full flex items-center justify-center gap-2 bg-[#fecdd3] text-red-700 py-3 rounded-xl font-bold text-sm hover:bg-[#fca5a5] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="flex items-center justify-center gap-2 bg-rose-50 border border-rose-200 text-rose-700 hover:bg-rose-100 py-2.5 rounded-lg text-sm font-bold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  <ThumbsDown className="w-4 h-4" /> Reject Candidate
+                  <ThumbsDown className="w-3.5 h-3.5" /> Reject
                 </button>
               )}
-
-              {/* Stage hint */}
-              <p className="text-[10px] text-muted-foreground text-center pt-1">
-                {candidate.status === "submitted" && "Only 'Accepted' is reachable from Offered stage onwards."}
-                {candidate.status === "offered" && "You may now Accept or Reject this candidate."}
-              </p>
             </div>
           )}
 
@@ -355,9 +356,9 @@ function CandidateDetailPanel({ candidate, onClose, onMove, loading }: {
                 alert("Error downloading CV");
               }
             }}
-            className="w-full flex items-center justify-center gap-2 bg-secondary text-white py-3 rounded-xl font-bold text-sm hover:bg-secondary/90 transition-colors"
+            className="w-full flex items-center justify-center gap-2 border border-black/[0.08] bg-black/[0.02] text-black hover:bg-black/[0.05] py-2.5 rounded-lg text-sm font-bold transition-colors"
           >
-            <Download className="w-4 h-4" /> View CV
+            <Download className="w-3.5 h-3.5" /> View Resume
           </button>
         </div>
       </div>
@@ -466,9 +467,9 @@ export function PipelinePage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] bg-red-600 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center gap-2 text-sm font-semibold max-w-lg text-center"
+            className="fixed top-4 left-1/2 -translate-x-1/2 z-[60] bg-rose-50 text-rose-700 border border-rose-200 px-4 py-2.5 rounded-lg shadow-xl flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider max-w-lg text-center"
           >
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
             {invalidDropMsg}
           </motion.div>
         )}
@@ -494,32 +495,30 @@ export function PipelinePage() {
       </AnimatePresence>
 
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-black text-foreground" style={{ fontFamily: 'var(--font-display)' }}>Recruitment Pipeline</h1>
-        <p className="text-muted-foreground mt-1">
-          Structured workflow: <span className="font-semibold text-foreground">Applied → Screening → Interview → Offered → Accepted/Rejected</span>
-        </p>
+      <div className="border-b border-black/[0.08] pb-4">
+        <h1 className="text-xl font-black text-foreground" style={{ fontFamily: 'var(--font-display)' }}>Recruitment Pipeline</h1>
+        <p className="text-xs text-muted-foreground mt-0.5">Structured workflow tracking candidate advancement from application to placement</p>
       </div>
 
       {/* Workflow guide */}
-      <div className="bg-[#f8f8fc] border border-black/[0.06] rounded-2xl px-5 py-3 flex flex-wrap gap-2 items-center text-xs font-semibold text-muted-foreground">
-        <span className="text-sky-600 font-bold">Applied</span>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-orange-600 font-bold">Screening</span>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-violet-600 font-bold">Interview</span>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-pink-600 font-bold">Offered</span>
-        <ChevronRight className="w-3.5 h-3.5" />
-        <span className="text-emerald-600 font-bold">Accepted</span>
-        <span className="mx-2 text-muted-foreground/40">or</span>
-        <span className="text-red-500 font-bold">Rejected</span>
-        <span className="ml-auto text-[10px] text-muted-foreground/60">Drag cards only to valid next stages • Click card to open detail panel</span>
+      <div className="bg-black/[0.01] border border-black/[0.08] rounded-xl px-4 py-3.5 flex flex-wrap gap-2 items-center text-xs font-sans font-bold text-muted-foreground">
+        <span className="text-[#0052CC]">01. Applied</span>
+        <ChevronRight className="w-3 h-3 text-muted-foreground/45" />
+        <span className="text-amber-600">02. Screening</span>
+        <ChevronRight className="w-3 h-3 text-muted-foreground/45" />
+        <span className="text-violet-600">03. Interview</span>
+        <ChevronRight className="w-3 h-3 text-muted-foreground/45" />
+        <span className="text-pink-600">04. Offered</span>
+        <ChevronRight className="w-3 h-3 text-muted-foreground/45" />
+        <span className="text-emerald-600">05. Accepted</span>
+        <span className="mx-1 text-muted-foreground/35">/</span>
+        <span className="text-rose-600">Rejected</span>
+        <span className="ml-auto text-[10px] text-muted-foreground/60 font-medium font-sans">Drag cards only to valid next stages · Click card to open detail panel</span>
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-muted-foreground text-sm font-semibold">
-          <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto mb-4" />
+        <div className="text-center py-20 text-muted-foreground text-sm font-sans font-semibold">
+          <div className="w-6 h-6 border-2 border-[#0052CC]/30 border-t-[#0052CC] rounded-full animate-spin mx-auto mb-4" />
           Loading recruitment pipeline...
         </div>
       ) : (
@@ -536,10 +535,9 @@ export function PipelinePage() {
               return (
                 <div
                   key={col.id}
-                  className={`w-64 rounded-2xl border-2 p-4 flex flex-col min-h-[450px] transition-all
-                    ${col.color}
-                    ${isHovered && isValidDrop ? "ring-2 ring-secondary/60 scale-[1.01]" : ""}
-                    ${isHovered && !isValidDrop ? "ring-2 ring-red-400/60 opacity-70" : ""}
+                  className={`w-64 rounded-xl border p-4 flex flex-col min-h-[480px] transition-all bg-black/[0.01] border-black/[0.08]
+                    ${isHovered && isValidDrop ? "border-[#0052CC] bg-[#0052CC]/[0.02] shadow-[0_0_15px_rgba(0,82,204,0.06)] scale-[1.01]" : ""}
+                    ${isHovered && !isValidDrop ? "border-rose-300 bg-rose-50/[0.1] opacity-70" : ""}
                   `}
                   onDragOver={e => {
                     e.preventDefault();
@@ -548,15 +546,18 @@ export function PipelinePage() {
                   onDragLeave={() => setDragOverCol(null)}
                   onDrop={e => handleDrop(e, col.id)}
                 >
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-black text-sm text-foreground" style={{ fontFamily: 'var(--font-display)' }}>{col.label}</h3>
-                    <span className={`${col.badge} text-xs font-bold px-2 py-0.5 rounded-full`}>{colCandidates.length}</span>
+                  <div className="flex items-center justify-between mb-4 pb-2 border-b border-black/[0.06]">
+                    <div className="flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${col.accent}`} />
+                      <h3 className="font-black text-xs uppercase tracking-wide text-foreground" style={{ fontFamily: 'var(--font-display)' }}>{col.label}</h3>
+                    </div>
+                    <span className={`${col.badge} text-[10px] font-bold px-2 py-0.5 rounded-full border`}>{colCandidates.length}</span>
                   </div>
 
                   {/* Valid-drop hint */}
                   {isHovered && (
-                    <div className={`mb-2 text-[10px] font-semibold text-center py-1 rounded-lg
-                      ${isValidDrop ? "bg-secondary/10 text-secondary" : "bg-red-100 text-red-600"}`}>
+                    <div className={`mb-3 text-[10px] font-sans font-bold text-center py-1.5 rounded-lg border
+                      ${isValidDrop ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-rose-50 text-rose-700 border-rose-200"}`}>
                       {isValidDrop ? `✓ Drop here` : `✗ Invalid transition`}
                     </div>
                   )}
@@ -572,33 +573,34 @@ export function PipelinePage() {
                         }}
                         onDragEnd={() => setDragCandidateId(null)}
                         onClick={() => setSelectedCandidate(c)}
-                        className="bg-white rounded-xl p-4 border border-black/[0.06] cursor-grab hover:shadow-md transition-shadow active:cursor-grabbing hover:border-secondary/35 group"
+                        className="bg-white rounded-xl p-3.5 border border-black/[0.08] cursor-grab hover:shadow-md transition-all active:cursor-grabbing hover:border-[#0052CC]/40 hover:scale-[1.01] group relative"
                       >
-                        <div className="flex items-center gap-2.5 mb-3">
-                          <div className={`w-8 h-8 ${c.avatarBg || 'bg-primary'} rounded-lg flex items-center justify-center text-white text-xs font-bold flex-shrink-0`}>
+                        <div className="flex items-center gap-2.5 mb-2.5">
+                          <div className="w-8 h-8 bg-[#0052CC]/[0.06] border border-[#0052CC]/12 rounded-lg flex items-center justify-center text-[#0052CC] font-mono font-bold text-xs flex-shrink-0">
                             {c.avatar}
                           </div>
-                          <div className="min-w-0">
-                            <p className="font-bold text-xs text-foreground truncate">{c.name}</p>
-                            <p className="text-[10px] text-muted-foreground truncate">{c.experience}</p>
+                          <div className="min-w-0 flex-1 text-xs">
+                            <p className="font-bold text-black truncate leading-snug">{c.name}</p>
+                            <p className="text-[11px] text-muted-foreground truncate mt-0.5">{c.role}</p>
                           </div>
                         </div>
-                        <div className="flex items-center justify-between text-[10px]">
+
+                        <div className="flex items-center justify-between text-xs mb-2">
                           <ScoreBadge score={c.cvScore} />
-                          <span className="text-muted-foreground font-medium">{c.appliedDate}</span>
+                          <span className="text-muted-foreground/70 text-[10px] font-medium">{c.appliedDate}</span>
                         </div>
 
-                        <div className="mt-2.5 flex gap-1 flex-wrap">
+                        <div className="flex gap-1 flex-wrap mb-2.5">
                           {c.skills.slice(0, 2).map(s => (
-                            <span key={s} className="text-[9px] bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full font-medium">{s}</span>
+                            <span key={s} className="text-[10px] bg-black/[0.03] text-muted-foreground border border-black/[0.05] px-1.5 py-0.5 rounded-full font-bold">{s}</span>
                           ))}
                         </div>
 
-                        <div className="mt-2 pt-2 border-t border-black/[0.04] flex items-center justify-between text-[9px] text-muted-foreground font-semibold">
-                          <span>Chance: <strong className="text-secondary">{c.hiringChance}%</strong></span>
+                        <div className="pt-2 border-t border-black/[0.06] flex items-center justify-between text-[10px] text-muted-foreground font-sans font-bold">
+                          <span>Chance: <strong className="text-[#0052CC]">{c.hiringChance}%</strong></span>
                           {/* Quick-action hint — show next step label on hover */}
                           {!["accepted", "rejected"].includes(c.status) && (
-                            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-secondary">
+                            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[#0052CC] text-[9px] uppercase tracking-wider font-mono">
                               {NEXT_LABEL[c.status] ? `→ ${NEXT_LABEL[c.status].replace("Move to ", "")}` : ""}
                             </span>
                           )}
@@ -606,10 +608,12 @@ export function PipelinePage() {
                       </div>
                     ))}
                     {colCandidates.length === 0 && (
-                      <div className="text-center py-10 text-muted-foreground text-xs italic">
-                        {dragCandidateId && dragOverCol === col.id && !isValidDrop
-                          ? "❌ Invalid drop"
-                          : "Drop candidates here"}
+                      <div className="text-center py-10 text-muted-foreground/60 text-xs flex flex-col items-center justify-center gap-1.5 border border-dashed border-black/[0.08] rounded-xl bg-black/[0.005] h-full min-h-[150px]">
+                        {dragCandidateId && dragOverCol === col.id && !isValidDrop ? (
+                          <span className="text-rose-600 font-bold text-[10px] font-sans">❌ Invalid drop</span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground/60 font-sans">Empty Stage</span>
+                        )}
                       </div>
                     )}
                   </div>
