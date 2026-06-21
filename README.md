@@ -1,5 +1,13 @@
 # TalentLensAI — AI-Powered Recruitment Platform
 
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![TypeScript](https://img.shields.io/badge/typescript-%23007acc.svg?style=for-the-badge&logo=typescript&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
+![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+![Flask](https://img.shields.io/badge/flask-%23000.svg?style=for-the-badge&logo=flask&logoColor=white)
+![Scikit-Learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)
+
 TalentLensAI is a state-of-the-art, high-performance recruitment intelligence platform designed to eliminate manual screening and find hidden potential in seconds. It bridges the gap between candidates looking for their ideal roles and recruiters searching for top-tier talent through robust AI processing, scoring vectors, and interactive dashboard analytics.
 
 The original UI design inspiration is available on [Figma](https://www.figma.com/design/sEModL6MpEr9fwuDThA4x1/AI-Recruitment-Platform-Design).
