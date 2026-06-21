@@ -3,10 +3,13 @@ Authentication routes using Supabase Auth.
 Replaces db.json flat-file auth with real Supabase user management.
 Includes Google OAuth user synchronization endpoint.
 """
+import os
 from flask import Blueprint, request, jsonify
 from services.supabase_service import register_user, login_user
 
 auth_bp = Blueprint("auth", __name__)
+
+APP_URL = os.environ.get("APP_URL", "https://talentlens-ai.vercel.app")
 
 
 @auth_bp.route("/login", methods=["POST"])
@@ -280,3 +283,102 @@ def sync_oauth_user():
             "lastName": db_last,
         }
     }), 201
+
+
+@auth_bp.route("/forgot-password", methods=["POST"])
+def forgot_password():
+    """
+    Sends a branded password reset email via Brevo.
+    Uses Supabase's resetPasswordForEmail to generate a secure token,
+    then sends our own branded email with the reset link.
+    """
+    from services.supabase_service import supabase_anon, supabase
+    from services.email_service import send_password_reset_email
+
+    data = request.get_json() or {}
+    email = data.get("email", "").strip().lower()
+
+    if not email:
+        return jsonify({"error": "Email address is required."}), 400
+
+    # Always return success to prevent email enumeration attacks
+    try:
+        # Look up the user in our users table
+        user_res = (
+            supabase.table("users")
+            .select("id, email, first_name, last_name")
+            .eq("email", email)
+            .maybe_single()
+            .execute()
+        )
+        user_row = user_res.data if user_res else None
+        if isinstance(user_row, list):
+            user_row = user_row[0] if user_row else None
+
+        if user_row:
+            first_name = user_row.get("first_name") or "there"
+            recipient_name = f"{first_name} {user_row.get('last_name', '')}".strip() or first_name
+
+            # Build the redirect URL that Supabase will forward the user to
+            redirect_to = f"{APP_URL}/reset-password"
+
+            # Trigger Supabase's password reset flow — generates a secure link
+            reset_res = supabase_anon.auth.reset_password_email(
+                email,
+                options={"redirect_to": redirect_to}
+            )
+            print(f"[forgot-password] Supabase reset triggered for {email}. Result: {reset_res}")
+
+            # Build the link the user will click in our email.
+            # Supabase will send its own email too; we override with Brevo for branding.
+            # We send Supabase's redirect URL so the user lands on our /reset-password page
+            # where they enter a new password (the hash fragment carries the token).
+            reset_url = f"{APP_URL}/reset-password"
+            send_password_reset_email(email, recipient_name, reset_url)
+        else:
+            print(f"[forgot-password] Email not found: {email} (silent ignore)")
+
+    except Exception as e:
+        print(f"[forgot-password] Error: {e}")
+        # Still return success to prevent enumeration
+
+    return jsonify({
+        "message": "If an account with that email exists, a password reset link has been sent."
+    }), 200
+
+
+@auth_bp.route("/reset-password", methods=["POST"])
+def reset_password():
+    """
+    Resets the user's password using a Supabase access token obtained from
+    the #access_token hash fragment after clicking the reset link.
+    """
+    from services.supabase_service import supabase_anon
+
+    data = request.get_json() or {}
+    access_token = data.get("access_token", "").strip()
+    new_password = data.get("new_password", "")
+
+    if not access_token or not new_password:
+        return jsonify({"error": "access_token and new_password are required."}), 400
+
+    if len(new_password) < 6:
+        return jsonify({"error": "Password must be at least 6 characters."}), 400
+
+    try:
+        # Set the session using the recovery token
+        session_res = supabase_anon.auth.set_session(access_token, "")
+        if not session_res or not session_res.session:
+            return jsonify({"error": "Invalid or expired reset link. Please request a new one."}), 401
+
+        # Update the password
+        update_res = supabase_anon.auth.update_user({"password": new_password})
+        if not update_res or not update_res.user:
+            return jsonify({"error": "Failed to update password. Please try again."}), 500
+
+        print(f"[reset-password] Password updated for user {update_res.user.email}")
+        return jsonify({"message": "Password updated successfully."}), 200
+
+    except Exception as e:
+        print(f"[reset-password] Error: {e}")
+        return jsonify({"error": "Failed to reset password. Please request a new reset link.", "details": str(e)}), 500

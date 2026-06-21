@@ -473,3 +473,112 @@ def send_status_change_email(
             error_message=error_msg,
         )
         return False
+
+
+# ─── Password Reset Email ─────────────────────────────────────────────────────
+def send_password_reset_email(recipient_email: str, recipient_name: str, reset_url: str) -> bool:
+    """
+    Sends a branded password-reset email to the given address via Brevo.
+    Returns True on success, False on failure.
+    """
+    import requests
+
+    subject = "Reset Your TalentLensAI Password 🔐"
+
+    html_body = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Reset Your Password</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f5f3;font-family:Inter,Helvetica Neue,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f5f5f3;padding:40px 0;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 8px 40px rgba(0,0,0,0.08);">
+        <tr>
+          <td style="background:#111111;padding:32px 40px;text-align:center;">
+            <div><div style="width:10px;height:10px;background:#ffffff;display:inline-block;vertical-align:middle;margin-right:6px;"></div>
+            <span style="color:#ffffff;font-size:11px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;vertical-align:middle;">Intelligence OS</span></div>
+            <h1 style="color:#ffffff;font-size:28px;font-weight:900;margin:8px 0 0;letter-spacing:-0.5px;">TalentLensAI</h1>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:40px 40px 32px;">
+            <h2 style="font-size:22px;font-weight:800;color:#111827;margin:0 0 8px;">Password Reset Request</h2>
+            <p style="font-size:14px;color:#6b7280;margin:0 0 24px;line-height:1.6;">
+              Hi <strong>{recipient_name}</strong>, we received a request to reset your password for your TalentLensAI account.
+            </p>
+            <div style="text-align:center;margin:32px 0;">
+              <a href="{reset_url}"
+                 style="display:inline-block;background:#111111;color:#ffffff;font-size:14px;font-weight:700;
+                        padding:16px 36px;border-radius:12px;text-decoration:none;letter-spacing:0.03em;">
+                Reset My Password
+              </a>
+            </div>
+            <div style="background:#f9fafb;border:1px solid #f3f4f6;border-radius:12px;padding:20px 24px;margin-top:24px;">
+              <p style="font-size:12px;color:#6b7280;margin:0;line-height:1.6;">
+                This link will expire in <strong>1 hour</strong>. If you did not request a password reset, you can safely ignore this email.
+              </p>
+            </div>
+            <p style="font-size:11px;color:#9ca3af;margin:24px 0 0;line-height:1.6;">
+              If the button doesn't work, copy and paste this link:<br/>
+              <a href="{reset_url}" style="color:#DC2626;word-break:break-all;">{reset_url}</a>
+            </p>
+          </td>
+        </tr>
+        <tr>
+          <td style="background:#f9fafb;padding:24px 40px;border-top:1px solid #f3f4f6;text-align:center;">
+            <p style="font-size:11px;color:#9ca3af;margin:0;">
+              &copy; 2025 TalentLensAI &middot; AI-Powered Recruitment Platform
+            </p>
+          </td>
+        </tr>
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>"""
+
+    plain_body = (
+        f"Hi {recipient_name},\n\n"
+        "We received a request to reset your TalentLensAI password.\n\n"
+        f"Reset link (expires in 1 hour):\n{reset_url}\n\n"
+        "If you did not request this, please ignore this email.\n\n"
+        "Best regards,\nTalentLensAI Team"
+    )
+
+    try:
+        if not BREVO_API_KEY:
+            raise ValueError("BREVO_API_KEY not set.")
+
+        url = "https://api.brevo.com/v3/smtp/email"
+        headers = {
+            "accept": "application/json",
+            "api-key": BREVO_API_KEY,
+            "content-type": "application/json"
+        }
+        payload = {
+            "sender": {"name": BREVO_SENDER_NAME, "email": BREVO_SENDER_EMAIL},
+            "to": [{"email": recipient_email, "name": recipient_name}],
+            "subject": subject,
+            "htmlContent": html_body,
+            "textContent": plain_body
+        }
+
+        response = requests.post(url, json=payload, headers=headers, timeout=15)
+
+        if response.status_code not in (200, 201, 202):
+            try:
+                err_json = response.json()
+            except Exception:
+                err_json = {}
+            error_msg = err_json.get("message") or f"HTTP {response.status_code}"
+            raise RuntimeError(f"Brevo API error: {error_msg}")
+
+        print(f"[email_service] Password reset email sent to {recipient_email}")
+        return True
+
+    except Exception as err:
+        print(f"[email_service] Password reset email failed: {err}")
+        return False

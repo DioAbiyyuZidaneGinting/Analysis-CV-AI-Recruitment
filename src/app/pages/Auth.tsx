@@ -8,6 +8,8 @@ import {
   Lock,
   User,
   Briefcase,
+  CheckCircle,
+  X,
 } from "lucide-react";
 
 import { signInWithGoogle, signInWithGithub } from "../utils/auth";
@@ -38,6 +40,13 @@ export function AuthPage() {
   const [lastName, setLastName] = useState("");
 
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Forgot Password modal state
+  const [showForgotModal, setShowForgotModal] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotError, setForgotError] = useState("");
+  const [forgotSuccess, setForgotSuccess] = useState(false);
 
   const cursorRef = useRef<HTMLDivElement>(null);
   const spotlightRef = useRef<HTMLDivElement>(null);
@@ -97,6 +106,29 @@ export function AuthPage() {
       cancelAnimationFrame(raf);
     };
   }, []);
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setForgotError("");
+    setForgotLoading(true);
+    try {
+      const res = await fetch(apiUrl("/api/auth/forgot-password"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      setForgotLoading(false);
+      if (res.ok) {
+        setForgotSuccess(true);
+      } else {
+        const data = await res.json();
+        setForgotError(data.error || "Something went wrong. Please try again.");
+      }
+    } catch {
+      setForgotLoading(false);
+      setForgotError("Could not connect to server. Please try again.");
+    }
+  };
 
   const handleSubmit = async (
     e: React.FormEvent
@@ -730,6 +762,13 @@ export function AuthPage() {
 
                     <button
                       type="button"
+                      id="forgot-password-btn"
+                      onClick={() => {
+                        setForgotEmail(email);
+                        setForgotError("");
+                        setForgotSuccess(false);
+                        setShowForgotModal(true);
+                      }}
                       className="
                       text-xs
                       text-black/50
@@ -1812,6 +1851,120 @@ export function AuthPage() {
         )}
 
       </main>
+
+      {/* ── Forgot Password Modal ─────────────────────────────────────────── */}
+      {showForgotModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)" }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowForgotModal(false);
+              setForgotSuccess(false);
+            }
+          }}
+        >
+          <div className="bg-white rounded-[2rem] p-8 w-full max-w-[420px] shadow-[0_20px_80px_-10px_rgba(0,0,0,0.2)] relative">
+            {/* Close button */}
+            <button
+              type="button"
+              id="forgot-modal-close"
+              onClick={() => { setShowForgotModal(false); setForgotSuccess(false); }}
+              className="absolute top-5 right-5 text-black/30 hover:text-black transition-colors"
+            >
+              <X size={20} />
+            </button>
+
+            {forgotSuccess ? (
+              /* Success state */
+              <div className="text-center py-4">
+                <div className="w-14 h-14 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <CheckCircle className="text-green-500" size={28} />
+                </div>
+                <h3 className="text-xl font-bold mb-2">Check Your Email</h3>
+                <p className="text-sm text-black/50 leading-relaxed mb-6">
+                  If an account exists for <strong>{forgotEmail}</strong>, we've
+                  sent a password reset link. Please check your inbox and spam folder.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => { setShowForgotModal(false); setForgotSuccess(false); }}
+                  className="w-full bg-black text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all"
+                >
+                  Back to Login
+                </button>
+              </div>
+            ) : (
+              /* Form state */
+              <>
+                <div className="mb-6">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="w-2 h-2 bg-black" />
+                    <span className="text-[9px] uppercase tracking-[0.15em] font-bold text-black/50">
+                      Account Recovery
+                    </span>
+                  </div>
+                  <h3
+                    className="text-2xl font-bold mb-1"
+                    style={{ fontFamily: "var(--font-display)" }}
+                  >
+                    Forgot Password?
+                  </h3>
+                  <p className="text-xs text-black/50 leading-relaxed">
+                    Enter your email address and we'll send you a link to reset your password.
+                  </p>
+                </div>
+
+                {forgotError && (
+                  <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3 text-red-600 text-xs">
+                    {forgotError}
+                  </div>
+                )}
+
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div>
+                    <label className="text-[9px] font-bold uppercase tracking-[0.15em] ml-1 block mb-1.5">
+                      Email Address
+                    </label>
+                    <div className="relative">
+                      <Mail
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-black/40"
+                        size={16}
+                      />
+                      <input
+                        id="forgot-email-input"
+                        type="email"
+                        value={forgotEmail}
+                        onChange={(e) => setForgotEmail(e.target.value)}
+                        placeholder="name@company.com"
+                        required
+                        className="w-full bg-black/[0.04] rounded-xl py-3 pl-12 pr-4 text-sm"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    id="forgot-submit-btn"
+                    type="submit"
+                    disabled={forgotLoading}
+                    className="w-full bg-black text-white py-3.5 rounded-xl font-semibold hover:opacity-90 transition-all text-sm disabled:opacity-60"
+                  >
+                    {forgotLoading ? "Sending…" : "Send Reset Link"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(false)}
+                    className="w-full text-xs text-black/40 hover:text-black transition-colors py-1"
+                  >
+                    Cancel
+                  </button>
+                </form>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

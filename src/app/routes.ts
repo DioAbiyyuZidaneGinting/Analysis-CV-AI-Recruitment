@@ -3,6 +3,7 @@ import { Root } from "./Root";
 import { LandingPage } from "./pages/Landing";
 import { AuthPage } from "./pages/Auth";
 import { AuthCallbackPage } from "./pages/AuthCallback";
+import { ResetPasswordPage } from "./pages/ResetPasswordPage";
 import { CandidateLayout } from "./pages/candidate/CandidateLayout";
 import { DashboardPage } from "./pages/candidate/DashboardPage";
 import { CvAnalysisPage } from "./pages/candidate/CvAnalysisPage";
@@ -29,6 +30,8 @@ export const router = createBrowserRouter([
       { path: "register", Component: AuthPage },
       // Google OAuth redirect landing — must live outside protected layouts
       { path: "auth/callback", Component: AuthCallbackPage },
+      // Password reset — Supabase redirects here after reset link click
+      { path: "reset-password", Component: ResetPasswordPage },
       {
         path: "candidate",
         Component: CandidateLayout,
