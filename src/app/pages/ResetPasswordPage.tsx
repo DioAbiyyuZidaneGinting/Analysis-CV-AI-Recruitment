@@ -1,35 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft } from "lucide-react";
-import { apiUrl } from "../utils/apiConfig";
+import { Lock, Eye, EyeOff, CheckCircle, ArrowLeft, Loader2 } from "lucide-react";
+import { supabase } from "../utils/supabaseClient";
+
+type PageState = "loading" | "ready" | "success" | "error";
 
 export function ResetPasswordPage() {
   const navigate = useNavigate();
 
-  const [accessToken, setAccessToken] = useState("");
+  const [pageState, setPageState] = useState<PageState>("loading");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
-
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
-  const [success, setSuccess] = useState(false);
-
-  // Extract access_token from the URL hash set by Supabase redirect
-  useEffect(() => {
-    const hash = window.location.hash;
-    const params = new URLSearchParams(hash.replace("#", "?"));
-    const token = params.get("access_token") || "";
-    const type = params.get("type") || "";
-    if (token && (type === "recovery" || type === "")) {
-      setAccessToken(token);
-    } else if (!token) {
-      setErrorMsg(
-        "Invalid or missing reset link. Please request a new password reset."
-      );
-    }
-  }, []);
 
   // Spotlight cursor refs
   const cursorRef = useRef<HTMLDivElement>(null);
@@ -40,34 +25,56 @@ export function ResetPasswordPage() {
     const cursor = cursorRef.current;
     const spotlight = spotlightRef.current;
     if (!cursor || !spotlight) return;
-
-    let cx = -100,
-      cy = -100,
-      sx = -100,
-      sy = -100;
-    const onMove = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
-    };
+    let cx = -100, cy = -100, sx = -100, sy = -100;
+    const onMove = (e: MouseEvent) => { mouseRef.current = { x: e.clientX, y: e.clientY }; };
     window.addEventListener("mousemove", onMove);
-
     let raf: number;
     const tick = () => {
       const { x: mx, y: my } = mouseRef.current;
-      cx += (mx - cx) * 0.2;
-      cy += (my - cy) * 0.2;
-      sx += (mx - sx) * 0.05;
-      sy += (my - sy) * 0.05;
-      cursor.style.left = cx + "px";
-      cursor.style.top = cy + "px";
+      cx += (mx - cx) * 0.2; cy += (my - cy) * 0.2;
+      sx += (mx - sx) * 0.05; sy += (my - sy) * 0.05;
+      cursor.style.left = cx + "px"; cursor.style.top = cy + "px";
       spotlight.style.setProperty("--x", sx + "px");
       spotlight.style.setProperty("--y", sy + "px");
       raf = requestAnimationFrame(tick);
     };
     raf = requestAnimationFrame(tick);
+    return () => { window.removeEventListener("mousemove", onMove); cancelAnimationFrame(raf); };
+  }, []);
+
+  // Listen for Supabase PASSWORD_RECOVERY event
+  // When the user clicks the reset link in their email, Supabase redirects to
+  // /reset-password#access_token=...&type=recovery
+  // The Supabase JS client (detectSessionInUrl: true) automatically reads the hash
+  // and fires the PASSWORD_RECOVERY event with an active session.
+  useEffect(() => {
+    // Give Supabase a moment to process the URL hash
+    const timeout = setTimeout(() => {
+      // Check if Supabase already picked up a recovery session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session) {
+          setPageState("ready");
+        } else {
+          setPageState("error");
+          setErrorMsg(
+            "Link reset tidak valid atau sudah kadaluarsa. Silakan minta link baru."
+          );
+        }
+      });
+    }, 800);
+
+    // Also listen for the auth state change event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      console.log("[ResetPasswordPage] auth event:", event);
+      if (event === "PASSWORD_RECOVERY") {
+        clearTimeout(timeout);
+        setPageState("ready");
+      }
+    });
 
     return () => {
-      window.removeEventListener("mousemove", onMove);
-      cancelAnimationFrame(raf);
+      clearTimeout(timeout);
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -75,44 +82,47 @@ export function ResetPasswordPage() {
     e.preventDefault();
     setErrorMsg("");
 
-    if (!accessToken) {
-      setErrorMsg("Invalid reset link. Please request a new password reset.");
-      return;
-    }
     if (password.length < 6) {
-      setErrorMsg("Password must be at least 6 characters.");
+      setErrorMsg("Password minimal 6 karakter.");
       return;
     }
     if (password !== confirm) {
-      setErrorMsg("Passwords do not match.");
+      setErrorMsg("Password tidak cocok.");
       return;
     }
 
-    setIsLoading(true);
+    setIsSubmitting(true);
     try {
-      const res = await fetch(apiUrl("/api/auth/reset-password"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          access_token: accessToken,
-          new_password: password,
-        }),
-      });
-      const data = await res.json();
-      setIsLoading(false);
+      // Use Supabase JS client directly — no backend needed
+      const { error } = await supabase.auth.updateUser({ password });
 
-      if (res.ok) {
-        setSuccess(true);
-        // Redirect to login after 3 seconds
-        setTimeout(() => navigate("/login"), 3000);
-      } else {
-        setErrorMsg(data.error || "Failed to reset password. Please try again.");
+      if (error) {
+        setErrorMsg(error.message || "Gagal memperbarui password. Coba lagi.");
+        setIsSubmitting(false);
+        return;
       }
-    } catch {
-      setIsLoading(false);
-      setErrorMsg("Could not connect to server. Please try again.");
+
+      setPageState("success");
+      // Sign out so user can log in fresh with new password
+      await supabase.auth.signOut();
+      // Redirect to login after 3 seconds
+      setTimeout(() => navigate("/login"), 3000);
+    } catch (err: any) {
+      setErrorMsg(err.message || "Terjadi kesalahan. Coba lagi.");
+      setIsSubmitting(false);
     }
   };
+
+  const strengthLevel = (() => {
+    if (!password) return 0;
+    if (password.length < 6) return 1;
+    if (password.length < 8) return 2;
+    if (password.length < 12) return 3;
+    return 4;
+  })();
+
+  const strengthColor = ["#e5e7eb", "#ef4444", "#f59e0b", "#3b82f6", "#16a34a"][strengthLevel];
+  const strengthLabel = ["", "Lemah", "Cukup", "Kuat", "Sangat Kuat"][strengthLevel];
 
   return (
     <div
@@ -166,20 +176,47 @@ export function ResetPasswordPage() {
               </h1>
             </div>
 
-            {success ? (
-              /* Success State */
+            {/* Loading */}
+            {pageState === "loading" && (
+              <div className="text-center py-8">
+                <Loader2 className="animate-spin mx-auto mb-3 text-black/40" size={28} />
+                <p className="text-sm text-black/50">Memverifikasi link reset password…</p>
+              </div>
+            )}
+
+            {/* Error */}
+            {pageState === "error" && (
+              <div className="text-center py-4">
+                <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl">⚠️</span>
+                </div>
+                <h2 className="text-xl font-bold mb-2">Link Tidak Valid</h2>
+                <p className="text-sm text-black/50 leading-relaxed mb-6">{errorMsg}</p>
+                <button
+                  type="button"
+                  onClick={() => navigate("/login")}
+                  className="w-full bg-black text-white py-3 rounded-xl font-semibold text-sm hover:opacity-90 transition-all"
+                >
+                  Kembali ke Login
+                </button>
+              </div>
+            )}
+
+            {/* Success */}
+            {pageState === "success" && (
               <div className="text-center py-6">
                 <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
                   <CheckCircle className="text-green-500" size={32} />
                 </div>
-                <h2 className="text-xl font-bold mb-2">Password Updated!</h2>
+                <h2 className="text-xl font-bold mb-2">Password Berhasil Diubah!</h2>
                 <p className="text-sm text-black/50 leading-relaxed">
-                  Your password has been reset successfully. Redirecting you to
-                  login&hellip;
+                  Password kamu sudah diperbarui. Mengarahkan ke halaman login…
                 </p>
               </div>
-            ) : (
-              /* Form */
+            )}
+
+            {/* Ready — Password Form */}
+            {pageState === "ready" && (
               <>
                 <div className="mb-6 text-center">
                   <h2
@@ -189,7 +226,7 @@ export function ResetPasswordPage() {
                     Set New Password
                   </h2>
                   <p className="text-xs text-black/50">
-                    Enter and confirm your new password below.
+                    Masukkan dan konfirmasi password baru kamu.
                   </p>
                 </div>
 
@@ -203,18 +240,15 @@ export function ResetPasswordPage() {
                   {/* New password */}
                   <div>
                     <label className="text-[9px] font-bold uppercase tracking-[0.15em] ml-1 block mb-1.5">
-                      New Password
+                      Password Baru
                     </label>
                     <div className="relative">
-                      <Lock
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-black/40"
-                        size={16}
-                      />
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-black/40" size={16} />
                       <input
                         type={showPassword ? "text" : "password"}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        placeholder="Min. 6 characters"
+                        placeholder="Min. 6 karakter"
                         required
                         className="w-full bg-black/[0.04] rounded-xl py-3 pl-12 pr-12 text-sm"
                       />
@@ -226,23 +260,38 @@ export function ResetPasswordPage() {
                         {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
+
+                    {/* Strength bar */}
+                    {password && (
+                      <div className="mt-2">
+                        <div className="flex gap-1">
+                          {[1, 2, 3, 4].map((i) => (
+                            <div
+                              key={i}
+                              className="h-1 flex-1 rounded-full transition-all duration-300"
+                              style={{ background: i <= strengthLevel ? strengthColor : "#e5e7eb" }}
+                            />
+                          ))}
+                        </div>
+                        <p className="text-[10px] mt-1 ml-1" style={{ color: strengthColor }}>
+                          {strengthLabel}
+                        </p>
+                      </div>
+                    )}
                   </div>
 
                   {/* Confirm password */}
                   <div>
                     <label className="text-[9px] font-bold uppercase tracking-[0.15em] ml-1 block mb-1.5">
-                      Confirm Password
+                      Konfirmasi Password
                     </label>
                     <div className="relative">
-                      <Lock
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-black/40"
-                        size={16}
-                      />
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-black/40" size={16} />
                       <input
                         type={showConfirm ? "text" : "password"}
                         value={confirm}
                         onChange={(e) => setConfirm(e.target.value)}
-                        placeholder="Repeat your new password"
+                        placeholder="Ulangi password baru"
                         required
                         className="w-full bg-black/[0.04] rounded-xl py-3 pl-12 pr-12 text-sm"
                       />
@@ -254,41 +303,28 @@ export function ResetPasswordPage() {
                         {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
                       </button>
                     </div>
+
+                    {/* Match indicator */}
+                    {confirm && (
+                      <p className={`text-[10px] mt-1 ml-1 ${password === confirm ? "text-green-600" : "text-red-500"}`}>
+                        {password === confirm ? "✓ Password cocok" : "✗ Password tidak cocok"}
+                      </p>
+                    )}
                   </div>
 
-                  {/* Password strength hint */}
-                  {password && (
-                    <div className="flex gap-1 mt-1">
-                      {[...Array(4)].map((_, i) => (
-                        <div
-                          key={i}
-                          className="h-1 flex-1 rounded-full transition-all"
-                          style={{
-                            background:
-                              password.length >= (i + 1) * 2
-                                ? password.length >= 10
-                                  ? "#16a34a"
-                                  : password.length >= 6
-                                  ? "#f59e0b"
-                                  : "#ef4444"
-                                : "rgba(0,0,0,0.08)",
-                          }}
-                        />
-                      ))}
-                    </div>
-                  )}
-
                   <button
-                    type="submit"
                     id="reset-password-submit"
-                    disabled={isLoading || !accessToken}
-                    className="w-full bg-black text-white py-3.5 rounded-xl font-semibold hover:opacity-90 transition-all text-sm disabled:opacity-60"
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full bg-black text-white py-3.5 rounded-xl font-semibold hover:opacity-90 transition-all text-sm disabled:opacity-60 flex items-center justify-center gap-2"
                   >
-                    {isLoading ? "Updating Password…" : "Update Password"}
+                    {isSubmitting && <Loader2 size={16} className="animate-spin" />}
+                    {isSubmitting ? "Memperbarui…" : "Update Password"}
                   </button>
                 </form>
               </>
             )}
+
           </div>
         </div>
       </main>
