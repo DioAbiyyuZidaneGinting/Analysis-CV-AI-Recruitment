@@ -426,11 +426,14 @@ def send_status_change_email(
         if not MAIL_USERNAME or not MAIL_PASSWORD:
             raise ValueError("MAIL_USERNAME or MAIL_PASSWORD not set.")
 
-        server = smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=10)
-        server.ehlo()
-        if MAIL_USE_TLS:
-            server.starttls()
+        if MAIL_PORT == 465:
+            server = smtplib.SMTP_SSL(MAIL_SERVER, MAIL_PORT, timeout=10)
+        else:
+            server = smtplib.SMTP(MAIL_SERVER, MAIL_PORT, timeout=10)
             server.ehlo()
+            if MAIL_USE_TLS:
+                server.starttls()
+                server.ehlo()
         server.login(MAIL_USERNAME, MAIL_PASSWORD)
         server.sendmail(MAIL_USERNAME, recipient_email, msg.as_string())
         server.quit()
