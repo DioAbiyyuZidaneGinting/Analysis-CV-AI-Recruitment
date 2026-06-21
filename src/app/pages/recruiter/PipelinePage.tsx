@@ -282,6 +282,30 @@ function CandidateDetailPanel({ candidate, onClose, onMove, loading, showToast }
           </div>
         </div>
 
+        {/* Applied Positions */}
+        <div className="space-y-3">
+          <h3 className="font-black text-xs text-foreground uppercase tracking-wide" style={{ fontFamily: 'var(--font-display)' }}>
+            Applied Positions ({candidate.appliedJobs?.length || 0})
+          </h3>
+          <div className="space-y-2">
+            {candidate.appliedJobs && candidate.appliedJobs.length > 0 ? (
+              candidate.appliedJobs.map((job: any, index: number) => (
+                <div key={index} className="flex items-center justify-between p-2.5 rounded-lg border border-black/[0.06] bg-black/[0.01]">
+                  <div>
+                    <p className="font-semibold text-xs text-foreground">{job.title}</p>
+                    <p className="text-[10px] text-muted-foreground">{job.department} · {job.appliedAt}</p>
+                  </div>
+                  <span className={`text-[9px] font-mono font-bold px-2 py-0.5 rounded border ${STATUS_COLORS[job.status.toLowerCase()] || 'bg-black/[0.02] text-muted-foreground border-black/[0.08]'}`}>
+                    {STATUS_LABELS[job.status.toLowerCase()] || job.status}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-muted-foreground italic">No other applications found.</p>
+            )}
+          </div>
+        </div>
+
         {/* Skills */}
         <div className="space-y-3">
           <h3 className="font-black text-xs text-foreground uppercase tracking-wide" style={{ fontFamily: 'var(--font-display)' }}>Skills</h3>

@@ -165,6 +165,34 @@ function CandidateDetailPanel({ candidate, onClose, onAction }: {
           </div>
         </div>
 
+        {/* Applied Positions */}
+        <div className="bg-white border border-slate-200/50 rounded-2xl p-5 shadow-sm space-y-3">
+          <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-400 mb-1" style={{ fontFamily: 'var(--font-display)' }}>
+            Applied Positions ({candidate.appliedJobs?.length || 0})
+          </h3>
+          <div className="space-y-2">
+            {candidate.appliedJobs && candidate.appliedJobs.length > 0 ? (
+              candidate.appliedJobs.map((job: any, index: number) => (
+                <div key={index} className="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 bg-slate-50/50">
+                  <div>
+                    <p className="font-bold text-xs text-slate-700">{job.title}</p>
+                    <p className="text-[10px] text-slate-400 font-medium">{job.department} · {job.appliedAt}</p>
+                  </div>
+                  <span className={`text-[9px] font-bold px-2.5 py-0.5 rounded-full border ${
+                    job.status.toLowerCase() === 'accepted' ? 'bg-emerald-50 text-emerald-700 border-emerald-200/60' :
+                    job.status.toLowerCase() === 'rejected' ? 'bg-rose-50 text-rose-700 border-rose-200/60' :
+                    'bg-sky-50 text-sky-700 border-sky-200/60'
+                  }`}>
+                    {job.status.charAt(0).toUpperCase() + job.status.slice(1)}
+                  </span>
+                </div>
+              ))
+            ) : (
+              <p className="text-xs text-slate-400 italic">No other applications found.</p>
+            )}
+          </div>
+        </div>
+
         {/* Skills */}
         <div className="bg-white border border-slate-200/50 rounded-2xl p-5 shadow-sm">
           <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-400 mb-3" style={{ fontFamily: 'var(--font-display)' }}>Verified Skills</h3>
